@@ -1,4 +1,7 @@
 mod game;
-mod resource_manager;
+mod graphics;
 mod shader;
+mod shader_manager;
+mod sprite_renderer;
 mod texture;
+mod texture_manager;

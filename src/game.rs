@@ -1,33 +1,49 @@
+use std::path::Path;
+
+use nalgebra_glm as glm;
+
+use crate::{
+    graphics::Graphics, shader_manager::ShaderManager, sprite_renderer::SpriteRenderer,
+    texture_manager::TextureManager,
+};
+
 #[derive(Debug)]
 enum GameState {
-    GameActive,
-    GameMenu,
-    GameWin,
+    Active,
+    Menu,
+    Win,
 }
 
 #[derive(Debug)]
 pub struct Game {
     state: GameState,
-    keys: [bool; 1024],
-    width: u32,
-    height: u32,
+    pub keys: [bool; 1024],
+    pub graphics: Graphics,
 }
 
 impl Game {
-    fn new(width: u32, height: u32) -> Self {
+    pub fn new(graphics: Graphics) -> Self {
         Self {
-            state: GameState::GameActive,
-            width,
-            height,
+            state: GameState::Active,
             keys: [false; 1024],
+            graphics,
         }
     }
 
-    fn init() {}
+    pub fn init(&mut self) {
+        self.graphics.init();
+    }
 
-    fn process_input() {}
+    pub fn process_input(&mut self, dt: f64) {}
 
-    fn update() {}
+    pub fn update(&mut self, dt: f64) {}
 
-    fn render() {}
+    pub fn render(&mut self) {
+        self.graphics.render();
+    }
+
+    pub fn clear(&mut self) {
+        //self.texture_manager.clear();
+        //self.shader_manager.clear();
+    }
 }

@@ -1,5 +1,6 @@
 extern crate glfw;
 use self::glfw::{Action, Context, Key};
+use gl::ACTIVE_RESOURCES;
 use glfw::ffi::{glfwGetTime, glfwPollEvents};
 
 extern crate gl;
@@ -7,19 +8,23 @@ use self::gl::types::*;
 
 extern crate image;
 
-use std::mem;
-use std::os::raw::c_void;
-use std::path::Path;
-use std::ptr;
 use std::sync::mpsc::Receiver;
 
+mod graphics;
+use graphics::Graphics;
+
 mod shader;
-use shader::Shader;
 
 mod texture;
 
 mod game;
 use game::Game;
+
+mod shader_manager;
+
+mod sprite_renderer;
+
+mod texture_manager;
 
 // settings
 const SCR_WIDTH: u32 = 800;
@@ -56,6 +61,11 @@ pub fn main() {
     // ---------------------------------------
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
+    // setup game
+    let graphics = Graphics::new(SCR_WIDTH, SCR_HEIGHT);
+    let mut game = Game::new(graphics);
+    game.init();
+
     // deltatime vairables
     let mut delta_time = 0.0;
     let mut last_frame = 0.0;
@@ -70,17 +80,21 @@ pub fn main() {
         // manage user input
         // TODO: This should be done from the game type eventually
         process_events(&mut window, &events);
+        game.process_input(delta_time);
 
         // update game state
+        game.update(delta_time);
 
         // render
         unsafe {
             gl::ClearColor(0.0, 0.0, 0.0, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
 
-            // game.render()
+            game.render();
         }
 
+        // delete all resources
+        game.clear();
         window.swap_buffers();
     }
 }
@@ -101,3 +115,13 @@ fn process_events(window: &mut glfw::Window, events: &Receiver<(f64, glfw::Windo
         }
     }
 }
+
+//fn key_callback(window: &mut glfw::Window, game: &mut Game, key: glfw::Key, scancode: glfw::Scancode, action: glfw::Action) {
+//    if key == glfw::Key::Escape && action == glfw::Action::Press {
+//        window.set_should_close(true);
+//    }
+//
+//    if action == glfw::Action::Press {
+//        game.keys[key.get_scancode().unwrap() as usize] = true;
+//    }
+//}

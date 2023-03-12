@@ -9,6 +9,7 @@ use gl::types::*;
 
 use nalgebra_glm::{Mat4, Vec2, Vec3, Vec4};
 
+#[derive(Debug)]
 pub struct Shader {
     pub id: u32,
 }
@@ -72,16 +73,27 @@ impl Shader {
     }
 
     /// actiavate the shader
-    pub unsafe fn use_program(&self) {
-        gl::UseProgram(self.id)
+    pub fn use_program(&self) -> &Shader {
+        unsafe {
+            gl::UseProgram(self.id);
+        }
+        self
     }
 
     pub unsafe fn set_bool(&self, name: &CStr, value: bool) {
         gl::Uniform1i(gl::GetUniformLocation(self.id, name.as_ptr()), value as i32);
     }
 
-    pub unsafe fn set_int(&self, name: &CStr, value: i32) {
-        gl::Uniform1i(gl::GetUniformLocation(self.id, name.as_ptr()), value);
+    pub fn set_int(&self, name: &str, value: i32) {
+        unsafe {
+            gl::Uniform1i(
+                gl::GetUniformLocation(
+                    self.id,
+                    CStr::from_ptr(name.as_ptr() as *const i8).as_ptr(),
+                ),
+                value,
+            );
+        }
     }
 
     pub unsafe fn set_float(&self, name: &CStr, value: f32) {
@@ -100,12 +112,17 @@ impl Shader {
         gl::Uniform2f(gl::GetUniformLocation(self.id, name.as_ptr()), x, y);
     }
 
-    pub unsafe fn set_vec3(&self, name: &CStr, value: &Vec3) {
-        gl::Uniform3fv(
-            gl::GetUniformLocation(self.id, name.as_ptr()),
-            1,
-            value.as_ptr(),
-        );
+    pub fn set_vec3(&self, name: &str, value: &Vec3) {
+        unsafe {
+            gl::Uniform3fv(
+                gl::GetUniformLocation(
+                    self.id,
+                    CStr::from_ptr(name.as_ptr() as *const i8).as_ptr(),
+                ),
+                1,
+                value.as_ptr(),
+            );
+        }
     }
 
     pub unsafe fn set_vec3_xyz(&self, name: &CStr, x: f32, y: f32, z: f32) {
@@ -124,18 +141,28 @@ impl Shader {
         gl::Uniform4f(gl::GetUniformLocation(self.id, name.as_ptr()), x, y, z, w);
     }
 
-    pub unsafe fn set_mat4(&self, name: &CStr, mat: &Mat4) {
-        gl::UniformMatrix4fv(
-            gl::GetUniformLocation(self.id, name.as_ptr()),
-            1,
-            gl::FALSE,
-            mat.as_ptr(),
-        );
+    pub fn set_mat4(&self, name: &str, mat: &Mat4) {
+        unsafe {
+            gl::UniformMatrix4fv(
+                // TODO: No idea if this casting is safe
+                gl::GetUniformLocation(
+                    self.id,
+                    CStr::from_ptr(name.as_ptr() as *const i8).as_ptr(),
+                ),
+                1,
+                gl::FALSE,
+                mat.as_ptr(),
+            );
+        }
     }
 
     unsafe fn check_compile_errors(&self, shader: u32, r#type: &str) {
         let mut success = gl::FALSE as GLint;
-        let mut info_log = Vec::with_capacity(1024);
+        let mut info_log: Vec<u8> = Vec::with_capacity(1024);
+        for val in &mut info_log {
+            *val = 0;
+        }
+
         info_log.set_len(1024 - 1);
         if r#type != "PROGRAM" {
             gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut success);

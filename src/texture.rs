@@ -2,6 +2,7 @@ use std::ffi::c_void;
 
 use gl::types::{GLenum, GLuint};
 
+#[derive(Debug)]
 pub struct Texture {
     pub id: GLuint,
     width: u32,
@@ -69,7 +70,7 @@ impl Texture {
         }
     }
 
-    fn bind(&self) {
+    pub fn bind(&self) {
         unsafe {
             gl::BindTexture(gl::TEXTURE_2D, self.id);
         }
