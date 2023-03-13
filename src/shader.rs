@@ -19,7 +19,7 @@ impl Shader {
     pub fn new(
         v_shader_code: CString,
         f_shader_code: CString,
-        geometry_path: Option<CString>,
+        geometry_code: Option<CString>,
     ) -> Self {
         let mut shader = Shader { id: 0 };
 
@@ -28,24 +28,39 @@ impl Shader {
             let vertex = gl::CreateShader(gl::VERTEX_SHADER);
             gl::ShaderSource(vertex, 1, &v_shader_code.as_ptr(), ptr::null());
             gl::CompileShader(vertex);
-            shader.check_compile_errors(vertex, "VERTEX");
+            check_compile_errors(vertex, "VERTEX");
 
             // fragment shader
             let fragment = gl::CreateShader(gl::FRAGMENT_SHADER);
             gl::ShaderSource(fragment, 1, &f_shader_code.as_ptr(), ptr::null());
             gl::CompileShader(fragment);
-            shader.check_compile_errors(fragment, "FRAGMENT");
+            check_compile_errors(fragment, "FRAGMENT");
+
+            // geometry shader
+            let mut geometry: u32 = 0;
+            if let Some(source) = geometry_code.as_ref() {
+                geometry = gl::CreateShader(gl::GEOMETRY_SHADER);
+                gl::ShaderSource(geometry, 1, &source.as_ptr(), ptr::null());
+                gl::CompileShader(geometry);
+                check_compile_errors(geometry, "GEOMETRY");
+            }
 
             // shader program
-            let id = gl::CreateProgram();
-            gl::AttachShader(id, vertex);
-            gl::AttachShader(id, fragment);
-            gl::LinkProgram(id);
-            shader.check_compile_errors(id, "PROGRAM");
+            shader.id = gl::CreateProgram();
+            gl::AttachShader(shader.id, vertex);
+            gl::AttachShader(shader.id, fragment);
+            if let Some(source) = geometry_code.as_ref() {
+                gl::AttachShader(shader.id, geometry);
+            }
+            gl::LinkProgram(shader.id);
+            check_compile_errors(shader.id, "PROGRAM");
+
             // delete the shaders as they're linked into our program now and no longer necessary
             gl::DeleteShader(vertex);
             gl::DeleteShader(fragment);
-            shader.id = id;
+            if let Some(source) = geometry_code {
+                gl::DeleteShader(geometry)
+            }
         }
 
         shader
@@ -122,47 +137,47 @@ impl Shader {
             );
         }
     }
+}
 
-    unsafe fn check_compile_errors(&self, shader: u32, r#type: &str) {
-        let mut success = gl::FALSE as GLint;
-        let mut info_log: Vec<u8> = Vec::with_capacity(1024);
-        for val in &mut info_log {
-            *val = 0;
+unsafe fn check_compile_errors(shader: u32, r#type: &str) {
+    let mut success = gl::FALSE as GLint;
+    let mut info_log: Vec<u8> = Vec::with_capacity(1024);
+    for val in &mut info_log {
+        *val = 0;
+    }
+
+    info_log.set_len(1024 - 1);
+    if r#type != "PROGRAM" {
+        gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut success);
+        if success != gl::TRUE as GLint {
+            gl::GetShaderInfoLog(
+                shader,
+                1024,
+                ptr::null_mut(),
+                info_log.as_mut_ptr() as *mut GLchar,
+            );
+            println!(
+                "ERROR::SHADER_COMPILATION_ERROR of type: {}\n{}\n\
+                          -- -------------------------------------------------- -- ",
+                r#type,
+                str::from_utf8(&info_log).unwrap()
+            )
         }
-
-        info_log.set_len(1024 - 1);
-        if r#type != "PROGRAM" {
-            gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut success);
-            if success != gl::TRUE as GLint {
-                gl::GetShaderInfoLog(
-                    shader,
-                    1024,
-                    ptr::null_mut(),
-                    info_log.as_mut_ptr() as *mut GLchar,
-                );
-                println!(
-                    "ERROR::SHADER_COMPILATION_ERROR of type: {}\n{}\n\
+    } else {
+        gl::GetProgramiv(shader, gl::LINK_STATUS, &mut success);
+        if success != gl::TRUE as GLint {
+            gl::GetProgramInfoLog(
+                shader,
+                1024,
+                ptr::null_mut(),
+                info_log.as_mut_ptr() as *mut GLchar,
+            );
+            println!(
+                "ERROR::SHADER_COMPILATION_ERROR of type: {}\n{}\n\
                           -- -------------------------------------------------- -- ",
-                    r#type,
-                    str::from_utf8(&info_log).unwrap()
-                )
-            }
-        } else {
-            gl::GetProgramiv(shader, gl::LINK_STATUS, &mut success);
-            if success != gl::TRUE as GLint {
-                gl::GetProgramInfoLog(
-                    shader,
-                    1024,
-                    ptr::null_mut(),
-                    info_log.as_mut_ptr() as *mut GLchar,
-                );
-                println!(
-                    "ERROR::SHADER_COMPILATION_ERROR of type: {}\n{}\n\
-                          -- -------------------------------------------------- -- ",
-                    r#type,
-                    str::from_utf8(&info_log).unwrap()
-                )
-            }
+                r#type,
+                str::from_utf8(&info_log).unwrap()
+            )
         }
     }
 }
