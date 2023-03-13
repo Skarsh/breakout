@@ -1,5 +1,6 @@
 use std::ffi::{c_void, CStr, CString};
 use std::mem::size_of;
+use std::rc::Rc;
 use std::{mem, ptr};
 
 use gl::types::{GLfloat, GLsizei, GLsizeiptr, GLuint};
@@ -11,18 +12,18 @@ use crate::{shader::Shader, texture::Texture};
 #[derive(Debug)]
 pub struct SpriteRenderer {
     quad_vao: GLuint,
+    shader: Rc<Shader>,
 }
 
 impl SpriteRenderer {
-    pub fn new() -> Self {
+    pub fn new(shader: Rc<Shader>) -> Self {
         let quad_vao = 0;
         init_render_data(quad_vao);
-        Self { quad_vao }
+        Self { quad_vao, shader }
     }
 
     pub fn draw_sprite(
         &mut self,
-        shader: &Shader,
         texture: &Texture,
         position: Vec2,
         size: Vec2,
@@ -30,7 +31,7 @@ impl SpriteRenderer {
         color: Vec3,
     ) {
         // prepare transformations
-        shader.use_program();
+        self.shader.use_program();
         let mut model = Mat4::identity();
 
         // first translate (transformations are: scale happens first,
@@ -49,9 +50,11 @@ impl SpriteRenderer {
         // scale
         model = glm::scale(&model, &glm::vec3(size.x, size.y, 1.0));
 
-        shader.set_mat4(&CString::new("model").unwrap(), &model);
+        self.shader
+            .set_mat4(&CString::new("model").unwrap(), &model);
 
-        shader.set_vec3(&CString::new("spriteColor").unwrap(), &color);
+        self.shader
+            .set_vec3(&CString::new("spriteColor").unwrap(), &color);
 
         // TODO: Can we abstract the unsafeness away to make no unsafe code in draw call?
         unsafe {

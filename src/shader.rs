@@ -23,27 +23,6 @@ impl Shader {
     ) -> Self {
         let mut shader = Shader { id: 0 };
 
-        //// 1. retrieve the vertex/fragment source code from filesystem
-        //let mut v_shader_file = File::open(vertex_path)
-        //    .unwrap_or_else(|_| panic!("failed to open file {}", vertex_path.display()));
-
-        //let mut f_shader_file = File::open(fragment_path)
-        //    .unwrap_or_else(|_| panic!("failed to open file {}", fragment_path.display()));
-
-        //let mut vertex_code = String::new();
-        //let mut fragment_code = String::new();
-
-        //v_shader_file
-        //    .read_to_string(&mut vertex_code)
-        //    .expect("Failed to read vertex shader");
-        //f_shader_file
-        //    .read_to_string(&mut fragment_code)
-        //    .expect("Failed to read fragment shader");
-
-        //let v_shader_code = CString::new(vertex_code.as_bytes()).unwrap();
-        //let f_shader_code = CString::new(fragment_code.as_bytes()).unwrap();
-
-        // 2. compile shaders
         unsafe {
             // vertex shader
             let vertex = gl::CreateShader(gl::VERTEX_SHADER);

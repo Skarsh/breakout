@@ -1,10 +1,10 @@
-use std::{collections::HashMap, ffi::CString, fs::File, io::Read, path::Path};
+use std::{collections::HashMap, ffi::CString, fs::File, io::Read, path::Path, rc::Rc};
 
 use crate::shader::Shader;
 
 #[derive(Debug)]
 pub struct ShaderManager {
-    shaders: HashMap<String, Shader>,
+    shaders: HashMap<String, Rc<Shader>>,
 }
 
 impl ShaderManager {
@@ -20,13 +20,14 @@ impl ShaderManager {
         f_shader_file: &Path,
         g_shader_file: Option<&Path>,
         name: String,
-    ) -> &Shader {
+    ) -> Rc<Shader> {
         self.shaders.insert(
             name.clone(),
-            load_shader_from_file(v_shader_file, f_shader_file, g_shader_file),
+            load_shader_from_file(v_shader_file, f_shader_file, g_shader_file).into(),
         );
         // TODO: Deal with unwrap
-        self.shaders.get(&name).unwrap()
+        //self.shaders.get(&name).unwrap().clone()
+        self.shaders.get(&name).unwrap().clone()
     }
 
     pub fn get_shader(&self, name: &str) -> &Shader {

@@ -64,7 +64,9 @@ pub fn main() {
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
     // setup game
-    let graphics = Graphics::new(SCR_WIDTH, SCR_HEIGHT);
+    let shader_manager = shader_manager::ShaderManager::new();
+    let texture_manager = texture_manager::TextureManager::new();
+    let graphics = Graphics::new(SCR_WIDTH, SCR_HEIGHT, shader_manager, texture_manager);
     let mut game = Game::new(graphics);
     game.init();
 

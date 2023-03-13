@@ -30,9 +30,7 @@ impl Game {
         }
     }
 
-    pub fn init(&mut self) {
-        self.graphics.init();
-    }
+    pub fn init(&mut self) {}
 
     pub fn process_input(&mut self, dt: f64) {}
 
