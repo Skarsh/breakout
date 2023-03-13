@@ -1,6 +1,6 @@
-use std::ffi::{c_void, CStr};
+use std::ffi::{c_void, CStr, CString};
 use std::mem::size_of;
-use std::ptr;
+use std::{mem, ptr};
 
 use gl::types::{GLfloat, GLsizei, GLsizeiptr, GLuint};
 use nalgebra_glm as glm;
@@ -15,7 +15,9 @@ pub struct SpriteRenderer {
 
 impl SpriteRenderer {
     pub fn new() -> Self {
-        Self { quad_vao: 0 }
+        let quad_vao = 0;
+        init_render_data(quad_vao);
+        Self { quad_vao }
     }
 
     pub fn draw_sprite(
@@ -47,11 +49,11 @@ impl SpriteRenderer {
         // scale
         model = glm::scale(&model, &glm::vec3(size.x, size.y, 1.0));
 
-        shader.set_mat4("model", &model);
+        shader.set_mat4(&CString::new("model").unwrap(), &model);
 
-        shader.set_vec3("spriteColor", &color);
+        shader.set_vec3(&CString::new("spriteColor").unwrap(), &color);
 
-        // TODO: Can we abstract the unsafety away to make no unsafe code in draw call?
+        // TODO: Can we abstract the unsafeness away to make no unsafe code in draw call?
         unsafe {
             gl::ActiveTexture(gl::TEXTURE0);
             texture.bind();
@@ -60,47 +62,43 @@ impl SpriteRenderer {
             gl::BindVertexArray(0);
         }
     }
+}
 
-    fn init_render_data(&mut self) {
-        let mut vbo = 0;
+fn init_render_data(mut quad_vao: u32) {
+    let mut vbo = 0;
 
-        #[rustfmt::skip]
-        let vertices: [f32; 24] = [
-            // pos      // tex
-            0.0, 1.0, 0.0, 1.0,
-            1.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
+    #[rustfmt::skip]
+    let vertices: [f32; 24] = [
+        // pos      // tex
+        0.0, 1.0, 0.0, 1.0,
+        1.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 0.0,
 
-            0.0, 1.0, 0.0, 1.0,
-            1.0, 1.0, 1.0, 1.0,
-            1.0, 0.0, 1.0, 0.0
-        ];
+        0.0, 1.0, 0.0, 1.0,
+        1.0, 1.0, 1.0, 1.0,
+        1.0, 0.0, 1.0, 0.0
+    ];
 
-        unsafe {
-            gl::GenVertexArrays(1, &mut self.quad_vao);
-            gl::GenBuffers(1, &mut vbo);
+    unsafe {
+        gl::GenVertexArrays(1, &mut quad_vao);
+        gl::GenBuffers(1, &mut vbo);
 
-            gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
-            gl::BufferData(
-                gl::ARRAY_BUFFER,
-                std::mem::size_of_val(&vertices) as GLsizeiptr,
-                vertices.as_ptr() as *const c_void,
-                gl::STATIC_DRAW,
-            );
+        gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
 
-            gl::BindVertexArray(self.quad_vao);
-            gl::EnableVertexAttribArray(0);
-            gl::VertexAttribPointer(
-                0,
-                4,
-                gl::FLOAT,
-                gl::FALSE,
-                4 * std::mem::size_of::<GLfloat>() as GLsizei,
-                ptr::null(),
-            );
+        gl::BufferData(
+            gl::ARRAY_BUFFER,
+            (vertices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
+            &vertices[0] as *const f32 as *const c_void,
+            gl::STATIC_DRAW,
+        );
 
-            gl::BindBuffer(gl::ARRAY_BUFFER, 0);
-            gl::BindVertexArray(0);
-        }
+        gl::BindVertexArray(quad_vao);
+
+        let stride = 4 * std::mem::size_of::<GLfloat>() as GLsizei;
+        gl::VertexAttribPointer(0, 4, gl::FLOAT, gl::FALSE, stride, ptr::null());
+        gl::EnableVertexAttribArray(0);
+
+        gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+        gl::BindVertexArray(0);
     }
 }

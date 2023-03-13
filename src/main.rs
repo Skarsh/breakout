@@ -13,6 +13,8 @@ use std::sync::mpsc::Receiver;
 mod graphics;
 use graphics::Graphics;
 
+mod macros;
+
 mod shader;
 
 mod texture;
@@ -89,9 +91,9 @@ pub fn main() {
         unsafe {
             gl::ClearColor(0.0, 0.0, 0.0, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT);
-
-            game.render();
         }
+
+        game.render();
 
         // delete all resources
         game.clear();

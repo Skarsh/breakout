@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{ffi::CString, path::Path};
 
 use nalgebra_glm as glm;
 
@@ -12,7 +12,7 @@ pub struct Graphics {
     height: u32,
     shader_manager: ShaderManager,
     texture_manager: TextureManager,
-    sprite_renderer: Option<SpriteRenderer>,
+    sprite_renderer: SpriteRenderer,
 }
 
 impl Graphics {
@@ -22,7 +22,7 @@ impl Graphics {
             height,
             shader_manager: ShaderManager::new(),
             texture_manager: TextureManager::new(),
-            sprite_renderer: None,
+            sprite_renderer: SpriteRenderer::new(),
         }
     }
 
@@ -39,13 +39,12 @@ impl Graphics {
         self.shader_manager
             .get_shader("sprite")
             .use_program()
-            .set_int("image", 0);
+            .set_int(&CString::new("image").unwrap(), 0);
+
         self.shader_manager
             .get_shader("sprite")
-            .set_mat4("projection", &projection);
+            .set_mat4(&CString::new("projection").unwrap(), &projection);
 
-        let renderer = SpriteRenderer::new();
-        self.sprite_renderer = Some(renderer);
         self.texture_manager.load_texture(
             Path::new("resources/textures/awesomeface.png"),
             true,
@@ -54,7 +53,7 @@ impl Graphics {
     }
 
     pub fn render(&mut self) {
-        self.sprite_renderer.as_mut().unwrap().draw_sprite(
+        self.sprite_renderer.draw_sprite(
             self.shader_manager.get_shader("sprite"),
             self.texture_manager.get_texture("face"),
             glm::vec2(200.0, 200.0),
