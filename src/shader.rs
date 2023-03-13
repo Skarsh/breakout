@@ -66,7 +66,7 @@ impl Shader {
         shader
     }
 
-    /// actiavate the shader
+    /// activate the shader
     pub fn use_program(&self) -> &Shader {
         unsafe {
             gl::UseProgram(self.id);
