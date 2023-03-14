@@ -1,10 +1,7 @@
 extern crate glfw;
 use self::glfw::{Action, Context, Key};
-use gl::ACTIVE_RESOURCES;
-use glfw::ffi::{glfwGetTime, glfwPollEvents};
 
 extern crate gl;
-use self::gl::types::*;
 
 extern crate image;
 
@@ -50,7 +47,7 @@ pub fn main() {
         .create_window(
             SCR_WIDTH,
             SCR_HEIGHT,
-            "LearnOpenGL",
+            "Breakout",
             glfw::WindowMode::Windowed,
         )
         .expect("Failed to create GLFW window");
