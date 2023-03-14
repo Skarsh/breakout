@@ -1,5 +1,4 @@
-use std::ffi::{c_void, CStr, CString};
-use std::mem::size_of;
+use std::ffi::{c_void, CString};
 use std::rc::Rc;
 use std::{mem, ptr};
 

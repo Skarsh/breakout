@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io::Read, path::Path};
+use std::{collections::HashMap, path::Path};
 
 use crate::texture::Texture;
 

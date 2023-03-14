@@ -1,4 +1,4 @@
-use std::{ffi::CString, path::Path, rc::Rc};
+use std::{ffi::CString, path::Path};
 
 use nalgebra_glm as glm;
 

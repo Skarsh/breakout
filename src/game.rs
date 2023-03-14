@@ -1,11 +1,4 @@
-use std::path::Path;
-
-use nalgebra_glm as glm;
-
-use crate::{
-    graphics::Graphics, shader_manager::ShaderManager, sprite_renderer::SpriteRenderer,
-    texture_manager::TextureManager,
-};
+use crate::graphics::Graphics;
 
 #[derive(Debug)]
 enum GameState {
