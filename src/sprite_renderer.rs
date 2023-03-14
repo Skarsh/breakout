@@ -16,8 +16,8 @@ pub struct SpriteRenderer {
 
 impl SpriteRenderer {
     pub fn new(shader: Rc<Shader>) -> Self {
-        let quad_vao = 0;
-        init_render_data(quad_vao);
+        let mut quad_vao: u32 = 0;
+        init_render_data(&mut quad_vao);
         Self { quad_vao, shader }
     }
 
@@ -66,11 +66,11 @@ impl SpriteRenderer {
     }
 }
 
-fn init_render_data(mut quad_vao: u32) {
+fn init_render_data(quad_vao: &mut u32) {
     let mut vbo = 0;
 
     #[rustfmt::skip]
-    let vertices: [f32; 24] = [
+        let vertices: [f32; 24] = [
         // pos      // tex
         0.0, 1.0, 0.0, 1.0,
         1.0, 0.0, 1.0, 0.0,
@@ -82,7 +82,7 @@ fn init_render_data(mut quad_vao: u32) {
     ];
 
     unsafe {
-        gl::GenVertexArrays(1, &mut quad_vao);
+        gl::GenVertexArrays(1, quad_vao);
         gl::GenBuffers(1, &mut vbo);
 
         gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
@@ -94,7 +94,7 @@ fn init_render_data(mut quad_vao: u32) {
             gl::STATIC_DRAW,
         );
 
-        gl::BindVertexArray(quad_vao);
+        gl::BindVertexArray(*quad_vao);
 
         let stride = 4 * std::mem::size_of::<GLfloat>() as GLsizei;
         gl::VertexAttribPointer(0, 4, gl::FLOAT, gl::FALSE, stride, ptr::null());

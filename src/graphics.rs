@@ -23,8 +23,6 @@ impl Graphics {
         mut shader_manager: ShaderManager,
         mut texture_manager: TextureManager,
     ) -> Self {
-        //let shader = Rc::new(shader_manager.load_shader(v_shader_file, f_shader_file, g_shader_file, name))
-
         let shader = shader_manager.load_shader(
             Path::new("shaders/sprite.vs"),
             Path::new("shaders/sprite.frag"),

@@ -1,6 +1,6 @@
 use std::ffi::c_void;
 
-use gl::types::{GLenum, GLuint};
+use gl::types::{GLenum, GLint, GLuint};
 
 #[derive(Debug)]
 pub struct Texture {
@@ -9,10 +9,10 @@ pub struct Texture {
     height: u32,
     pub internal_format: GLenum,
     pub image_format: GLenum,
-    wrap_s: u32,
-    wrap_t: u32,
-    filter_min: u32,
-    filter_max: u32,
+    wrap_s: GLenum,
+    wrap_t: GLenum,
+    filter_min: GLint,
+    filter_max: GLint,
 }
 
 impl Texture {
@@ -30,8 +30,8 @@ impl Texture {
             image_format: gl::RGB,
             wrap_s: gl::REPEAT,
             wrap_t: gl::REPEAT,
-            filter_min: gl::LINEAR,
-            filter_max: gl::LINEAR,
+            filter_min: gl::LINEAR as i32,
+            filter_max: gl::LINEAR as i32,
         }
     }
 
@@ -55,16 +55,10 @@ impl Texture {
             );
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, self.wrap_s as i32);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, self.wrap_t as i32);
-            gl::TextureParameteri(
-                gl::TEXTURE_2D,
-                gl::TEXTURE_MIN_FILTER,
-                self.filter_min as i32,
-            );
-            gl::TextureParameteri(
-                gl::TEXTURE_2D,
-                gl::TEXTURE_MAG_FILTER,
-                self.filter_max as i32,
-            );
+            gl::TextureParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, self.filter_min);
+            gl::TextureParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, self.filter_max);
+
+            gl::GenerateMipmap(gl::TEXTURE_2D);
 
             gl::BindTexture(gl::TEXTURE_2D, 0);
         }
