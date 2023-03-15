@@ -77,7 +77,13 @@ impl Shader {
 
     pub fn set_int(&self, name: &str, value: i32) {
         unsafe {
-            gl::Uniform1i(gl::GetUniformLocation(self.id, CStr::from_bytes_with_nul_unchecked(name.as_bytes()).as_ptr()), value);
+            gl::Uniform1i(
+                gl::GetUniformLocation(
+                    self.id,
+                    CStr::from_bytes_with_nul_unchecked(name.as_bytes()).as_ptr(),
+                ),
+                value,
+            );
         }
     }
 

@@ -3,9 +3,7 @@ use std::{fs, path::Path};
 use nalgebra_glm as glm;
 
 use crate::{
-    game_object::GameObject,
-    sprite_renderer::SpriteRenderer,
-    texture_manager::TextureManager
+    game_object::GameObject, sprite_renderer::SpriteRenderer, texture_manager::TextureManager,
 };
 
 #[derive(Debug)]

@@ -3,8 +3,7 @@ use std::path::Path;
 use nalgebra_glm as glm;
 
 use crate::{
-    shader_manager::ShaderManager, sprite_renderer::SpriteRenderer,
-    texture_manager::TextureManager,
+    shader_manager::ShaderManager, sprite_renderer::SpriteRenderer, texture_manager::TextureManager,
 };
 
 #[derive(Debug)]
