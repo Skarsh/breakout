@@ -1,9 +1,9 @@
-use std::{ffi::CString, path::Path};
+use std::path::Path;
 
 use nalgebra_glm as glm;
 
 use crate::{
-    shader::Shader, shader_manager::ShaderManager, sprite_renderer::SpriteRenderer,
+    shader_manager::ShaderManager, sprite_renderer::SpriteRenderer,
     texture_manager::TextureManager,
 };
 
@@ -35,11 +35,11 @@ impl Graphics {
         shader_manager
             .get_shader("sprite")
             .use_program()
-            .set_int(&CString::new("image").unwrap(), 0);
+            .set_int("image\0", 0);
 
         shader_manager
             .get_shader("sprite")
-            .set_mat4(&CString::new("projection").unwrap(), &projection);
+            .set_mat4("projection\0", &projection);
 
         texture_manager.load_texture(
             Path::new("resources/textures/awesomeface.png"),

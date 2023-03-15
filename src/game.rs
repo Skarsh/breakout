@@ -1,4 +1,4 @@
-use std::{ffi::CString, path::Path};
+use std::path::Path;
 
 use nalgebra_glm as glm;
 
@@ -53,11 +53,11 @@ impl<'a> Game<'a> {
             .shader_manager
             .get_shader("sprite")
             .use_program()
-            .set_int(CString::new("image").unwrap().as_c_str(), 0);
+            .set_int("image\0", 0);
         self.graphics
             .shader_manager
             .get_shader("sprite")
-            .set_mat4(CString::new("projection").unwrap().as_c_str(), &projection);
+            .set_mat4("projection\0", &projection);
 
         // set render-specific controls
         let renderer = SpriteRenderer::new(shader);

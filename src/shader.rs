@@ -1,7 +1,4 @@
 use std::ffi::{CStr, CString};
-use std::fs::File;
-use std::io::Read;
-use std::path::Path;
 use std::ptr;
 use std::str;
 
@@ -78,9 +75,9 @@ impl Shader {
         gl::Uniform1i(gl::GetUniformLocation(self.id, name.as_ptr()), value as i32);
     }
 
-    pub fn set_int(&self, name: &CStr, value: i32) {
+    pub fn set_int(&self, name: &str, value: i32) {
         unsafe {
-            gl::Uniform1i(gl::GetUniformLocation(self.id, name.as_ptr()), value);
+            gl::Uniform1i(gl::GetUniformLocation(self.id, CStr::from_bytes_with_nul_unchecked(name.as_bytes()).as_ptr()), value);
         }
     }
 
@@ -100,10 +97,13 @@ impl Shader {
         gl::Uniform2f(gl::GetUniformLocation(self.id, name.as_ptr()), x, y);
     }
 
-    pub fn set_vec3(&self, name: &CStr, value: &Vec3) {
+    pub fn set_vec3(&self, name: &str, value: &Vec3) {
         unsafe {
             gl::Uniform3fv(
-                gl::GetUniformLocation(self.id, name.as_ptr()),
+                gl::GetUniformLocation(
+                    self.id,
+                    CStr::from_bytes_with_nul_unchecked(name.as_bytes()).as_ptr(),
+                ),
                 1,
                 value.as_ptr(),
             );
@@ -126,11 +126,14 @@ impl Shader {
         gl::Uniform4f(gl::GetUniformLocation(self.id, name.as_ptr()), x, y, z, w);
     }
 
-    pub fn set_mat4(&self, name: &CStr, mat: &Mat4) {
+    pub fn set_mat4(&self, name: &str, mat: &Mat4) {
         unsafe {
             gl::UniformMatrix4fv(
                 // TODO: No idea if this casting is safe
-                gl::GetUniformLocation(self.id, name.as_ptr()),
+                gl::GetUniformLocation(
+                    self.id,
+                    CStr::from_bytes_with_nul_unchecked(name.as_bytes()).as_ptr(),
+                ),
                 1,
                 gl::FALSE,
                 mat.as_ptr(),

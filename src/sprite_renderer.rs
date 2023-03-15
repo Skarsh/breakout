@@ -1,4 +1,4 @@
-use std::ffi::{c_void, CString};
+use std::ffi::c_void;
 use std::rc::Rc;
 use std::{mem, ptr};
 
@@ -49,11 +49,9 @@ impl SpriteRenderer {
         // scale
         model = glm::scale(&model, &glm::vec3(size.x, size.y, 1.0));
 
-        self.shader
-            .set_mat4(&CString::new("model").unwrap(), &model);
+        self.shader.set_mat4("model\0", &model);
 
-        self.shader
-            .set_vec3(&CString::new("spriteColor").unwrap(), &color);
+        self.shader.set_vec3("spriteColor\0", &color);
 
         // TODO: Can we abstract the unsafeness away to make no unsafe code in draw call?
         unsafe {

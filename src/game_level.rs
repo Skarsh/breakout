@@ -5,8 +5,7 @@ use nalgebra_glm as glm;
 use crate::{
     game_object::GameObject,
     sprite_renderer::SpriteRenderer,
-    texture::Texture2D,
-    texture_manager::{self, TextureManager},
+    texture_manager::TextureManager
 };
 
 #[derive(Debug)]
