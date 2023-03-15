@@ -19,6 +19,10 @@ mod texture;
 mod game;
 use game::Game;
 
+mod game_object;
+
+mod game_level;
+
 mod shader_manager;
 
 mod sprite_renderer;

@@ -9,11 +9,11 @@ use crate::{
 
 #[derive(Debug)]
 pub struct Graphics {
-    width: u32,
-    height: u32,
-    shader_manager: ShaderManager,
-    texture_manager: TextureManager,
-    sprite_renderer: SpriteRenderer,
+    pub width: u32,
+    pub height: u32,
+    pub shader_manager: ShaderManager,
+    pub texture_manager: TextureManager,
+    pub sprite_renderer: SpriteRenderer,
 }
 
 impl Graphics {
@@ -58,11 +58,11 @@ impl Graphics {
 
     pub fn render(&mut self) {
         self.sprite_renderer.draw_sprite(
-            self.texture_manager.get_texture("face"),
-            glm::vec2(200.0, 200.0),
-            glm::vec2(300.0, 400.0),
-            45.0,
-            glm::vec3(0.0, 1.0, 0.0),
+            self.texture_manager.get_texture("background"),
+            glm::vec2(0.0, 0.0),
+            glm::vec2(self.width as f32, self.height as f32),
+            0.0,
+            glm::vec3(1.0, 1.0, 1.0),
         );
     }
 }

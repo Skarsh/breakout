@@ -3,7 +3,7 @@ use std::ffi::c_void;
 use gl::types::{GLenum, GLint, GLuint};
 
 #[derive(Debug)]
-pub struct Texture {
+pub struct Texture2D {
     pub id: GLuint,
     width: u32,
     height: u32,
@@ -15,7 +15,7 @@ pub struct Texture {
     filter_max: GLint,
 }
 
-impl Texture {
+impl Texture2D {
     pub fn new() -> Self {
         let mut texture = 0;
         unsafe {

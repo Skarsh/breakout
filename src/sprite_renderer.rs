@@ -6,7 +6,7 @@ use gl::types::{GLfloat, GLsizei, GLsizeiptr, GLuint};
 use nalgebra_glm as glm;
 use nalgebra_glm::{Mat4, Vec2, Vec3};
 
-use crate::{shader::Shader, texture::Texture};
+use crate::{shader::Shader, texture::Texture2D};
 
 #[derive(Debug)]
 pub struct SpriteRenderer {
@@ -23,7 +23,7 @@ impl SpriteRenderer {
 
     pub fn draw_sprite(
         &mut self,
-        texture: &Texture,
+        texture: &Texture2D,
         position: Vec2,
         size: Vec2,
         rotate: f32,

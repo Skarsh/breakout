@@ -1,10 +1,10 @@
 use std::{collections::HashMap, path::Path};
 
-use crate::texture::Texture;
+use crate::texture::Texture2D;
 
 #[derive(Debug)]
 pub struct TextureManager {
-    textures: HashMap<String, Texture>,
+    textures: HashMap<String, Texture2D>,
 }
 
 impl TextureManager {
@@ -14,13 +14,13 @@ impl TextureManager {
         }
     }
 
-    pub fn load_texture(&mut self, file: &Path, alpha: bool, name: &str) -> &Texture {
+    pub fn load_texture(&mut self, file: &Path, alpha: bool, name: &str) -> &Texture2D {
         self.textures
             .insert(name.to_string(), load_texture_from_file(file, alpha));
         self.textures.get(name).unwrap()
     }
 
-    pub fn get_texture(&self, name: &str) -> &Texture {
+    pub fn get_texture(&self, name: &str) -> &Texture2D {
         self.textures.get(name).unwrap()
     }
 
@@ -33,8 +33,8 @@ impl TextureManager {
     }
 }
 
-fn load_texture_from_file(file: &Path, alpha: bool) -> Texture {
-    let mut texture = Texture::new();
+fn load_texture_from_file(file: &Path, alpha: bool) -> Texture2D {
+    let mut texture = Texture2D::new();
 
     if alpha {
         texture.internal_format = gl::RGBA;

@@ -1,4 +1,6 @@
 mod game;
+mod game_level;
+mod game_object;
 mod graphics;
 mod shader;
 mod shader_manager;
