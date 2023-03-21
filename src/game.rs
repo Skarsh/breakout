@@ -63,7 +63,6 @@ impl<'a> Game<'a> {
         let renderer = SpriteRenderer::new(shader);
 
         // load textures
-        //self.graphics.
         self.graphics.texture_manager.load_texture(
             Path::new("resources/textures/background.jpg"),
             false,
