@@ -68,21 +68,25 @@ impl<'a> Game<'a> {
             false,
             "background",
         );
+
         self.graphics.texture_manager.load_texture(
             Path::new("resources/textures/awesomeface.png"),
             true,
             "face",
         );
+
         self.graphics.texture_manager.load_texture(
             Path::new("resources/textures/block.png"),
             false,
             "block",
         );
+
         self.graphics.texture_manager.load_texture(
             Path::new("resources/textures/block_solid.png"),
             false,
             "block_solid",
         );
+
         self.graphics.texture_manager.load_texture(
             Path::new("resources/textures/paddle.png"),
             true,
@@ -108,13 +112,15 @@ impl<'a> Game<'a> {
         match self.state {
             GameState::Active => {
                 self.graphics.render();
+                if let Some(level) = self.levels.get_mut(self.level as usize) {
+                    level.draw(&mut self.graphics.sprite_renderer);
+                }
             }
             _ => panic!("Illegal state"),
         }
     }
 
     pub fn clear(&mut self) {
-        //self.texture_manager.clear();
-        //self.shader_manager.clear();
+        self.graphics.clear();
     }
 }

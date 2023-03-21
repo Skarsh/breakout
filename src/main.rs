@@ -98,10 +98,10 @@ pub fn main() {
 
         game.render();
 
-        // delete all resources
-        game.clear();
         window.swap_buffers();
     }
+    // delete all resources
+    game.clear();
 }
 
 // NOTE: not the same version as in common.rs!

@@ -2,7 +2,7 @@ use std::ffi::c_void;
 
 use gl::types::{GLenum, GLint, GLuint};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Texture2D {
     pub id: GLuint,
     width: u32,

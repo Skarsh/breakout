@@ -2,7 +2,7 @@ use std::{collections::HashMap, path::Path};
 
 use crate::texture::Texture2D;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct TextureManager {
     textures: HashMap<String, Texture2D>,
 }

@@ -64,4 +64,9 @@ impl Graphics {
             glm::vec3(1.0, 1.0, 1.0),
         );
     }
+
+    pub fn clear(&mut self) {
+        self.texture_manager.clear();
+        self.shader_manager.clear();
+    }
 }
