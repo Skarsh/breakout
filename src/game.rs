@@ -12,15 +12,15 @@ enum GameState {
 }
 
 #[derive(Debug)]
-pub struct Game<'a> {
+pub struct Game {
     state: GameState,
     pub keys: [bool; 1024],
     pub graphics: Graphics,
-    levels: Vec<GameLevel<'a>>,
+    levels: Vec<GameLevel>,
     level: u32,
 }
 
-impl<'a> Game<'a> {
+impl Game {
     pub fn new(graphics: Graphics) -> Self {
         Self {
             state: GameState::Active,
@@ -94,8 +94,14 @@ impl<'a> Game<'a> {
         );
 
         // load levels
-        //let mut one = GameLevel {bricks: vec![]};
-        //one.load(Path::new("levels/one.lvl"), self.graphics.width, self.graphics.height / 2, &self.graphics.texture_manager);
+        let mut one = GameLevel { bricks: vec![] };
+        one.load(
+            Path::new("resources/levels/one.lvl"),
+            self.graphics.width,
+            self.graphics.height / 2,
+            &self.graphics.texture_manager,
+        );
+        self.levels.push(one);
         //let mut two = GameLevel {bricks: vec![]};
         //two.load(Path::new("levels/two.lvl"), self.graphics.width, self.graphics.height / 2, &self.graphics.texture_manager);
         //let mut three = GameLevel {bricks: vec![]};
@@ -113,7 +119,10 @@ impl<'a> Game<'a> {
             GameState::Active => {
                 self.graphics.render();
                 if let Some(level) = self.levels.get_mut(self.level as usize) {
-                    level.draw(&mut self.graphics.sprite_renderer);
+                    level.draw(
+                        &mut self.graphics.sprite_renderer,
+                        &self.graphics.texture_manager,
+                    );
                 }
             }
             _ => panic!("Illegal state"),
