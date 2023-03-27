@@ -2,7 +2,10 @@ use std::path::Path;
 
 use nalgebra_glm as glm;
 
-use crate::{game_level::GameLevel, graphics::Graphics, sprite_renderer::SpriteRenderer};
+use crate::{
+    ball::Ball, game_level::GameLevel, game_object::GameObject,
+    graphics::sprite_renderer::SpriteRenderer, graphics::Graphics,
+};
 
 #[derive(Debug)]
 enum GameState {
@@ -11,6 +14,11 @@ enum GameState {
     Win,
 }
 
+const PLAYER_SIZE: glm::Vec2 = glm::Vec2::new(100.0, 20.0);
+const PLAYER_VELOCITY: f32 = 500.0;
+const INITIAL_BALL_VELOCITY: glm::Vec2 = glm::Vec2::new(100.0, -350.0);
+const BALL_RADIUS: f32 = 12.5;
+
 #[derive(Debug)]
 pub struct Game {
     state: GameState,
@@ -18,6 +26,8 @@ pub struct Game {
     pub graphics: Graphics,
     levels: Vec<GameLevel>,
     level: u32,
+    player: Option<GameObject>,
+    ball: Option<Ball>,
 }
 
 impl Game {
@@ -28,6 +38,8 @@ impl Game {
             graphics,
             levels: vec![],
             level: 0,
+            player: None,
+            ball: None,
         }
     }
 
@@ -92,6 +104,22 @@ impl Game {
             true,
             "paddle",
         );
+
+        let player_pos = glm::vec2(
+            self.graphics.width as f32 / 2.0 - PLAYER_SIZE.x / 2.0,
+            self.graphics.height as f32 - PLAYER_SIZE.y,
+        );
+
+        self.player = Some(GameObject {
+            position: player_pos,
+            size: PLAYER_SIZE,
+            velocity: glm::vec2(0.0, 0.0),
+            color: glm::vec3(1.0, 1.0, 1.0),
+            rotation: 0.0,
+            is_solid: false,
+            destroyed: false,
+            sprite_id: String::from("paddle"),
+        });
 
         // load levels
         let mut one = GameLevel { bricks: vec![] };

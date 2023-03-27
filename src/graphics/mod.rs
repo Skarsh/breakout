@@ -1,10 +1,16 @@
+pub mod shader;
+pub mod shader_manager;
+pub mod sprite_renderer;
+pub mod texture;
+pub mod texture_manager;
+
 use std::path::Path;
 
 use nalgebra_glm as glm;
 
-use crate::{
-    shader_manager::ShaderManager, sprite_renderer::SpriteRenderer, texture_manager::TextureManager,
-};
+use shader_manager::ShaderManager;
+use sprite_renderer::SpriteRenderer;
+use texture_manager::TextureManager;
 
 #[derive(Debug)]
 pub struct Graphics {

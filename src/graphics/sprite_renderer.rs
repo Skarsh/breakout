@@ -6,7 +6,8 @@ use gl::types::{GLfloat, GLsizei, GLsizeiptr, GLuint};
 use nalgebra_glm as glm;
 use nalgebra_glm::{Mat4, Vec2, Vec3};
 
-use crate::{shader::Shader, texture::Texture2D};
+use super::shader::Shader;
+use super::texture::Texture2D;
 
 #[derive(Debug)]
 pub struct SpriteRenderer {

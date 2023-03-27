@@ -7,14 +7,12 @@ extern crate image;
 
 use std::sync::mpsc::Receiver;
 
+mod ball;
+
 mod graphics;
-use graphics::Graphics;
+use graphics::{shader_manager, texture_manager, Graphics};
 
 mod macros;
-
-mod shader;
-
-mod texture;
 
 mod game;
 use game::Game;
@@ -22,12 +20,6 @@ use game::Game;
 mod game_object;
 
 mod game_level;
-
-mod shader_manager;
-
-mod sprite_renderer;
-
-mod texture_manager;
 
 // settings
 const SCR_WIDTH: u32 = 800;

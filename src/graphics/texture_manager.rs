@@ -1,6 +1,6 @@
 use std::{collections::HashMap, path::Path};
 
-use crate::texture::Texture2D;
+use super::texture::Texture2D;
 
 #[derive(Debug, Clone)]
 pub struct TextureManager {

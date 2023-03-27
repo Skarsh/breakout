@@ -3,7 +3,8 @@ use std::{fs, path::Path};
 use nalgebra_glm as glm;
 
 use crate::{
-    game_object::GameObject, sprite_renderer::SpriteRenderer, texture_manager::TextureManager,
+    game_object::GameObject, graphics::sprite_renderer::SpriteRenderer,
+    graphics::texture_manager::TextureManager,
 };
 
 #[derive(Debug)]
@@ -94,7 +95,6 @@ impl GameLevel {
                         obj.color = glm::vec3(0.8, 0.8, 0.7);
                         obj.is_solid = true;
                         obj.sprite_id = String::from("block_solid");
-                        println!("size: {:?}", obj.size);
                         self.bricks.push(obj);
                     }
                     '2' => {

@@ -1,6 +1,6 @@
 use nalgebra_glm as glm;
 
-use crate::{game::Game, sprite_renderer::SpriteRenderer, texture::Texture2D};
+use crate::{graphics::sprite_renderer::SpriteRenderer, graphics::texture::Texture2D};
 
 #[derive(Debug)]
 pub struct GameObject {
@@ -20,9 +20,9 @@ impl Default for GameObject {
     fn default() -> Self {
         Self {
             position: glm::vec2(0.0, 0.0),
-            size: glm::vec2(0.0, 0.0),
+            size: glm::vec2(1.0, 1.0),
             velocity: glm::vec2(0.0, 0.0),
-            color: glm::vec3(0.0, 0.0, 0.0),
+            color: glm::vec3(1.0, 1.0, 1.0),
             rotation: 0.0,
             is_solid: false,
             destroyed: false,

@@ -1,9 +1,5 @@
+mod ball;
 mod game;
 mod game_level;
 mod game_object;
 mod graphics;
-mod shader;
-mod shader_manager;
-mod sprite_renderer;
-mod texture;
-mod texture_manager;

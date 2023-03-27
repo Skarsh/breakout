@@ -1,6 +1,6 @@
 use std::{collections::HashMap, ffi::CString, fs::File, io::Read, path::Path, rc::Rc};
 
-use crate::shader::Shader;
+use super::shader::Shader;
 
 #[derive(Debug)]
 pub struct ShaderManager {
