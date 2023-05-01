@@ -72,7 +72,7 @@ impl Game {
             .set_mat4("projection\0", &projection);
 
         // set render-specific controls
-        let renderer = SpriteRenderer::new(shader);
+        let _renderer = SpriteRenderer::new(shader);
 
         // load textures
         self.graphics.texture_manager.load_texture(
@@ -138,9 +138,9 @@ impl Game {
         //three.load(Path::new("levels/four.lvl"), self.graphics.width, self.graphics.height / 2, &self.graphics.texture_manager);
     }
 
-    pub fn process_input(&mut self, dt: f64) {}
+    pub fn process_input(&mut self, _dt: f64) {}
 
-    pub fn update(&mut self, dt: f64) {}
+    pub fn update(&mut self, _dt: f64) {}
 
     pub fn render(&mut self) {
         match self.state {

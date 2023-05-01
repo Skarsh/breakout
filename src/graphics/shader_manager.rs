@@ -47,7 +47,7 @@ impl ShaderManager {
 fn load_shader_from_file(
     v_shader_file: &Path,
     f_shader_file: &Path,
-    g_shader_file: Option<&Path>,
+    _g_shader_file: Option<&Path>,
 ) -> Shader {
     let mut v_shader_file = File::open(v_shader_file)
         .unwrap_or_else(|_| panic!("failed to open file {}", v_shader_file.display()));

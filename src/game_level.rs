@@ -70,7 +70,7 @@ impl GameLevel {
         tile_data: Vec<Vec<char>>,
         level_width: u32,
         level_height: u32,
-        texture_manager: &TextureManager,
+        _texture_manager: &TextureManager,
     ) {
         let height = tile_data.len();
         let width = tile_data.get(0).unwrap().len();

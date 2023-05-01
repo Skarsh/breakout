@@ -46,7 +46,7 @@ impl Shader {
             shader.id = gl::CreateProgram();
             gl::AttachShader(shader.id, vertex);
             gl::AttachShader(shader.id, fragment);
-            if let Some(source) = geometry_code.as_ref() {
+            if let Some(_source) = geometry_code.as_ref() {
                 gl::AttachShader(shader.id, geometry);
             }
             gl::LinkProgram(shader.id);
@@ -55,7 +55,7 @@ impl Shader {
             // delete the shaders as they're linked into our program now and no longer necessary
             gl::DeleteShader(vertex);
             gl::DeleteShader(fragment);
-            if let Some(source) = geometry_code {
+            if let Some(_source) = geometry_code {
                 gl::DeleteShader(geometry)
             }
         }
