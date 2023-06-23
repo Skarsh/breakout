@@ -10,6 +10,7 @@ use std::sync::mpsc::Receiver;
 mod ball;
 
 mod graphics;
+use gl::{types::GLenum, BLEND};
 use graphics::{shader_manager, texture_manager, Graphics};
 
 mod macros;
@@ -48,6 +49,7 @@ pub fn main() {
         )
         .expect("Failed to create GLFW window");
 
+
     window.make_current();
     window.set_key_polling(true);
     window.set_framebuffer_size_polling(true);
@@ -55,6 +57,13 @@ pub fn main() {
     // gl: load all OpenGL function pointers
     // ---------------------------------------
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+
+    // OpenGL configuration
+    unsafe {
+      gl::Viewport(0, 0, SCR_WIDTH as i32, SCR_HEIGHT as i32);  
+      gl::Enable(BLEND);
+      gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
+    }
 
     // setup game
     let shader_manager = shader_manager::ShaderManager::new();
