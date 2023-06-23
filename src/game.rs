@@ -84,7 +84,7 @@ impl Game {
         self.graphics.texture_manager.load_texture(
             Path::new("resources/textures/awesomeface.png"),
             true,
-            "face",
+            "ball",
         );
 
         self.graphics.texture_manager.load_texture(
@@ -105,6 +105,7 @@ impl Game {
             "paddle",
         );
 
+        // Player
         let player_pos = glm::vec2(
             self.graphics.width as f32 / 2.0 - PLAYER_SIZE.x / 2.0,
             self.graphics.height as f32 - PLAYER_SIZE.y,
@@ -121,6 +122,25 @@ impl Game {
             sprite_id: String::from("paddle"),
         });
 
+        // Ball
+        let ball_pos = glm::vec2(
+            self.graphics.width as f32 / 2.0 - PLAYER_SIZE.x / 2.0,
+            self.graphics.height as f32 - PLAYER_SIZE.y * 2.0,
+        );
+
+        let ball_object = GameObject {
+            position: ball_pos,
+            size: glm::vec2(BALL_RADIUS, BALL_RADIUS),
+            velocity: INITIAL_BALL_VELOCITY,
+            color: glm::vec3(1.0, 1.0, 1.0),
+            rotation: 0.0,
+            is_solid: false,
+            destroyed: false,
+            sprite_id: String::from("ball"),
+        };
+
+        self.ball = Some(Ball::new(ball_object, BALL_RADIUS, true));
+
         // load levels
         let mut one = GameLevel { bricks: vec![] };
         one.load(
@@ -130,12 +150,27 @@ impl Game {
             &self.graphics.texture_manager,
         );
         self.levels.push(one);
-        //let mut two = GameLevel {bricks: vec![]};
-        //two.load(Path::new("levels/two.lvl"), self.graphics.width, self.graphics.height / 2, &self.graphics.texture_manager);
-        //let mut three = GameLevel {bricks: vec![]};
-        //three.load(Path::new("levels/three.lvl"), self.graphics.width, self.graphics.height / 2, &self.graphics.texture_manager);
-        //let mut four = GameLevel {bricks: vec![]};
-        //three.load(Path::new("levels/four.lvl"), self.graphics.width, self.graphics.height / 2, &self.graphics.texture_manager);
+        let mut two = GameLevel { bricks: vec![] };
+        two.load(
+            Path::new("resources/levels/two.lvl"),
+            self.graphics.width,
+            self.graphics.height / 2,
+            &self.graphics.texture_manager,
+        );
+        let mut three = GameLevel { bricks: vec![] };
+        three.load(
+            Path::new("resources/levels/three.lvl"),
+            self.graphics.width,
+            self.graphics.height / 2,
+            &self.graphics.texture_manager,
+        );
+        let mut four = GameLevel { bricks: vec![] };
+        four.load(
+            Path::new("resources/levels/four.lvl"),
+            self.graphics.width,
+            self.graphics.height / 2,
+            &self.graphics.texture_manager,
+        );
     }
 
     pub fn process_input(&mut self, _dt: f64) {}
@@ -150,6 +185,18 @@ impl Game {
                     level.draw(
                         &mut self.graphics.sprite_renderer,
                         &self.graphics.texture_manager,
+                    );
+                }
+                if let Some(player) = &self.player {
+                    player.draw(
+                        &mut self.graphics.sprite_renderer,
+                        &self.graphics.texture_manager.get_texture("paddle"),
+                    );
+                }
+                if let Some(ball) = &self.ball {
+                    ball.draw(
+                        &mut self.graphics.sprite_renderer,
+                        &self.graphics.texture_manager.get_texture("ball"),
                     );
                 }
             }

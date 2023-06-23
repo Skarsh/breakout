@@ -37,7 +37,7 @@ fn load_texture_from_file(file: &Path, alpha: bool) -> Texture2D {
     let mut texture = Texture2D::new();
 
     if alpha {
-        texture.internal_format = gl::RGBA;
+        texture.internal_format = gl::RGBA as i32;
         texture.image_format = gl::RGBA;
     }
 

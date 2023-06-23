@@ -1,4 +1,7 @@
-use crate::game_object::GameObject;
+use crate::{
+    game_object::GameObject,
+    graphics::{sprite_renderer::SpriteRenderer, texture::Texture2D},
+};
 use nalgebra_glm as glm;
 
 #[derive(Debug)]
@@ -36,6 +39,10 @@ impl Ball {
         }
 
         self.object.position
+    }
+
+    pub fn draw(&self, renderer: &mut SpriteRenderer, sprite: &Texture2D) {
+        self.object.draw(renderer, sprite);
     }
 
     pub fn reset(&mut self, position: glm::Vec2, velocity: glm::Vec2) {
