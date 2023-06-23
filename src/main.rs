@@ -10,7 +10,7 @@ use std::sync::mpsc::Receiver;
 mod ball;
 
 mod graphics;
-use gl::{types::GLenum, BLEND};
+use gl::BLEND;
 use graphics::{shader_manager, texture_manager, Graphics};
 
 mod macros;

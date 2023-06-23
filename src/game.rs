@@ -3,8 +3,11 @@ use std::path::Path;
 use nalgebra_glm as glm;
 
 use crate::{
-    ball::Ball, game_level::GameLevel, game_object::GameObject,
-    graphics::sprite_renderer::SpriteRenderer, graphics::Graphics,
+    ball::{Ball, BALL_RADIUS},
+    game_level::GameLevel,
+    game_object::GameObject,
+    graphics::sprite_renderer::SpriteRenderer,
+    graphics::Graphics,
 };
 
 #[derive(Debug)]
@@ -14,10 +17,8 @@ enum GameState {
     Win,
 }
 
-const PLAYER_SIZE: glm::Vec2 = glm::Vec2::new(100.0, 20.0);
-const PLAYER_VELOCITY: f32 = 500.0;
-const INITIAL_BALL_VELOCITY: glm::Vec2 = glm::Vec2::new(100.0, -350.0);
-const BALL_RADIUS: f32 = 12.5;
+pub const PLAYER_SIZE: glm::Vec2 = glm::Vec2::new(100.0, 20.0);
+pub const PLAYER_VELOCITY: f32 = 500.0;
 
 #[derive(Debug)]
 pub struct Game {
@@ -124,22 +125,11 @@ impl Game {
 
         // Ball
         let ball_pos = glm::vec2(
-            self.graphics.width as f32 / 2.0 - PLAYER_SIZE.x / 2.0,
+            self.graphics.width as f32 / 2.0 - BALL_RADIUS,
             self.graphics.height as f32 - PLAYER_SIZE.y * 2.0,
         );
 
-        let ball_object = GameObject {
-            position: ball_pos,
-            size: glm::vec2(BALL_RADIUS, BALL_RADIUS),
-            velocity: INITIAL_BALL_VELOCITY,
-            color: glm::vec3(1.0, 1.0, 1.0),
-            rotation: 0.0,
-            is_solid: false,
-            destroyed: false,
-            sprite_id: String::from("ball"),
-        };
-
-        self.ball = Some(Ball::new(ball_object, BALL_RADIUS, true));
+        self.ball = Some(Ball::new(ball_pos, BALL_RADIUS, true));
 
         // load levels
         let mut one = GameLevel { bricks: vec![] };

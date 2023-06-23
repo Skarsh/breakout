@@ -4,6 +4,9 @@ use crate::{
 };
 use nalgebra_glm as glm;
 
+pub const INITIAL_BALL_VELOCITY: glm::Vec2 = glm::Vec2::new(100.0, -350.0);
+pub const BALL_RADIUS: f32 = 12.5;
+
 #[derive(Debug)]
 pub struct Ball {
     object: GameObject,
@@ -13,9 +16,19 @@ pub struct Ball {
 }
 
 impl Ball {
-    pub fn new(object: GameObject, radius: f32, stuck: bool) -> Self {
+    pub fn new(position: glm::Vec2, radius: f32, stuck: bool) -> Self {
         Self {
-            object,
+            object: GameObject {
+                position,
+                size: glm::vec2(BALL_RADIUS * 2.0, BALL_RADIUS * 2.0),
+                velocity: INITIAL_BALL_VELOCITY,
+                color: glm::vec3(1.0, 1.0, 1.0),
+                rotation: 0.0,
+                is_solid: false,
+                destroyed: false,
+                sprite_id: String::from("ball"),
+            },
+
             radius,
             stuck,
         }
