@@ -49,7 +49,6 @@ pub fn main() {
         )
         .expect("Failed to create GLFW window");
 
-
     window.make_current();
     window.set_key_polling(true);
     window.set_framebuffer_size_polling(true);
@@ -60,9 +59,9 @@ pub fn main() {
 
     // OpenGL configuration
     unsafe {
-      gl::Viewport(0, 0, SCR_WIDTH as i32, SCR_HEIGHT as i32);  
-      gl::Enable(BLEND);
-      gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
+        gl::Viewport(0, 0, SCR_WIDTH as i32, SCR_HEIGHT as i32);
+        gl::Enable(BLEND);
+        gl::BlendFunc(gl::SRC_ALPHA, gl::ONE_MINUS_SRC_ALPHA);
     }
 
     // setup game
