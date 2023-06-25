@@ -295,7 +295,7 @@ impl Game {
                     let strength = 2.0;
                     let old_velocity = ball.object.velocity;
                     ball.object.velocity.x = INITIAL_BALL_VELOCITY.x * percentage * strength;
-                    ball.object.velocity.y = -ball.object.velocity.y;
+                    ball.object.velocity.y = -1.0 * ball.object.velocity.y.abs();
                     ball.object.velocity =
                         glm::normalize(&ball.object.velocity) * glm::length(&old_velocity);
                 }
@@ -345,7 +345,7 @@ fn vector_direction(target: glm::Vec2) -> Direction {
     ];
 
     let mut max = 0.0;
-    let mut best_match = None;
+    let mut best_match = Direction::Up;
     for i in 0..4 {
         let dot_product = glm::dot(&glm::normalize(&target), &compass[i]);
 
@@ -356,14 +356,14 @@ fn vector_direction(target: glm::Vec2) -> Direction {
         if dot_product > max {
             max = dot_product;
             match i {
-                0 => best_match = Some(Direction::Up),
-                1 => best_match = Some(Direction::Right),
-                2 => best_match = Some(Direction::Down),
-                3 => best_match = Some(Direction::Left),
+                0 => best_match = Direction::Up,
+                1 => best_match = Direction::Right,
+                2 => best_match = Direction::Down,
+                3 => best_match = Direction::Left,
                 _ => eprintln!("Illegal direction!"),
             }
         }
     }
 
-    best_match.unwrap()
+    best_match
 }
