@@ -7,12 +7,12 @@ use nalgebra_glm as glm;
 pub const INITIAL_BALL_VELOCITY: glm::Vec2 = glm::Vec2::new(100.0, -350.0);
 pub const BALL_RADIUS: f32 = 12.5;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Ball {
-    object: GameObject,
+    pub object: GameObject,
     // ball state
-    radius: f32,
-    stuck: bool,
+    pub radius: f32,
+    pub stuck: bool,
 }
 
 impl Ball {
@@ -62,5 +62,13 @@ impl Ball {
         self.object.position = position;
         self.object.velocity = velocity;
         self.stuck = true;
+    }
+
+    pub fn position(&self) -> glm::Vec2 {
+        self.object.position
+    }
+
+    pub fn set_x(&mut self, x: f32) {
+        self.object.position.x = x;
     }
 }

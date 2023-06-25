@@ -84,7 +84,7 @@ pub fn main() {
 
         // manage user input
         // TODO: This should be done from the game type eventually
-        process_events(&mut window, &events);
+        process_events(&mut window, &events, &mut game);
         game.process_input(delta_time);
 
         // update game state
@@ -105,7 +105,11 @@ pub fn main() {
 }
 
 // NOTE: not the same version as in common.rs!
-fn process_events(window: &mut glfw::Window, events: &Receiver<(f64, glfw::WindowEvent)>) {
+fn process_events(
+    window: &mut glfw::Window,
+    events: &Receiver<(f64, glfw::WindowEvent)>,
+    game: &mut Game,
+) {
     for (_, event) in glfw::flush_messages(events) {
         match event {
             glfw::WindowEvent::FramebufferSize(width, height) => {
@@ -115,6 +119,24 @@ fn process_events(window: &mut glfw::Window, events: &Receiver<(f64, glfw::Windo
             }
             glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
                 window.set_should_close(true)
+            }
+            glfw::WindowEvent::Key(Key::A, _, Action::Press, _) => {
+                game.keys[glfw::Key::A as usize] = true;
+            }
+            glfw::WindowEvent::Key(Key::A, _, Action::Release, _) => {
+                game.keys[glfw::Key::A as usize] = false;
+            }
+            glfw::WindowEvent::Key(Key::D, _, Action::Press, _) => {
+                game.keys[glfw::Key::D as usize] = true;
+            }
+            glfw::WindowEvent::Key(Key::D, _, Action::Release, _) => {
+                game.keys[glfw::Key::D as usize] = false;
+            }
+            glfw::WindowEvent::Key(Key::Space, _, Action::Press, _) => {
+                game.keys[glfw::Key::Space as usize] = true;
+            }
+            glfw::WindowEvent::Key(Key::Space, _, Action::Release, _) => {
+                game.keys[glfw::Key::Space as usize] = false;
             }
             _ => {}
         }

@@ -2,7 +2,7 @@ use nalgebra_glm as glm;
 
 use crate::{graphics::sprite_renderer::SpriteRenderer, graphics::texture::Texture2D};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GameObject {
     // object state
     pub position: glm::Vec2,
