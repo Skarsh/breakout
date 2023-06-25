@@ -1,5 +1,6 @@
 use std::{ops::Neg, path::Path};
 
+use image::imageops::colorops::contrast_in_place;
 use nalgebra_glm as glm;
 
 use crate::{
@@ -124,11 +125,8 @@ impl Game {
         });
 
         // Ball
-        let ball_pos = glm::vec2(
-            self.graphics.width as f32 / 2.0 - BALL_RADIUS,
-            self.graphics.height as f32 - PLAYER_SIZE.y * 2.0,
-        );
-
+        let ball_pos =
+            player_pos + glm::vec2(PLAYER_SIZE.x / 2.0 - BALL_RADIUS, -BALL_RADIUS * 2.0);
         self.ball = Some(Ball::new(ball_pos, BALL_RADIUS, true));
 
         // load levels
@@ -281,25 +279,25 @@ impl Game {
                             }
                         }
                     }
+                }
+            }
+        }
+        if let Some(ref mut ball) = self.ball {
+            if let Some(ref player) = self.player {
+                let result = check_collision_circle(&ball, &player);
+                if !ball.stuck && result.0 {
+                    // check where it hit the board, and change directin accordingly
+                    let center_board = player.position.x + player.size.x / 2.0;
+                    let distance = (ball.position().x + ball.radius) - center_board;
+                    let percentage = distance / (player.size.x / 2.0);
 
-                    if let Some(ref player) = self.player {
-                        let result = check_collision_circle(&ball, &player);
-                        if !ball.stuck && result.0 {
-                            // check where it hit the board, and change directin accordingly
-                            let center_board = player.position.x + player.size.x / 2.0;
-                            let distance = (ball.position().x + ball.radius) - center_board;
-                            let percentage = distance / (player.size.x / 2.0);
-
-                            // move accordingly
-                            let strength = 2.0;
-                            let old_velocity = ball.object.velocity;
-                            ball.object.velocity.x =
-                                INITIAL_BALL_VELOCITY.x * percentage * strength;
-                            ball.object.velocity.y = -ball.object.velocity.y;
-                            ball.object.velocity =
-                                glm::normalize(&ball.object.velocity) * glm::length(&old_velocity);
-                        }
-                    }
+                    // move accordingly
+                    let strength = 2.0;
+                    let old_velocity = ball.object.velocity;
+                    ball.object.velocity.x = INITIAL_BALL_VELOCITY.x * percentage * strength;
+                    ball.object.velocity.y = -ball.object.velocity.y;
+                    ball.object.velocity =
+                        glm::normalize(&ball.object.velocity) * glm::length(&old_velocity);
                 }
             }
         }
@@ -350,6 +348,11 @@ fn vector_direction(target: glm::Vec2) -> Direction {
     let mut best_match = None;
     for i in 0..4 {
         let dot_product = glm::dot(&glm::normalize(&target), &compass[i]);
+
+        if dot_product.is_nan() {
+            continue;
+        }
+
         if dot_product > max {
             max = dot_product;
             match i {
@@ -360,7 +363,7 @@ fn vector_direction(target: glm::Vec2) -> Direction {
                 _ => eprintln!("Illegal direction!"),
             }
         }
-        println!("i: {}, dot_product: {}, max: {}", i, dot_product, max);
     }
+
     best_match.unwrap()
 }
