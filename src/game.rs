@@ -205,9 +205,14 @@ impl Game {
     pub fn update(&mut self, dt: f64) {
         if let Some(ref mut ball) = self.ball {
             ball.move_ball(dt as f32, self.graphics.width);
+            self.do_collisions();
         }
-
-        self.do_collisions();
+        if let Some(ref mut ball) = self.ball {
+            if ball.position().y >= self.graphics.height as f32 {
+                self.reset_level();
+                self.reset_player();
+            }
+        }
     }
 
     pub fn render(&mut self) {
@@ -239,6 +244,53 @@ impl Game {
 
     pub fn clear(&mut self) {
         self.graphics.clear();
+    }
+
+    fn reset_level(&mut self) {
+        match self.level {
+            0 => self.levels.get_mut(0).unwrap().load(
+                Path::new("resources/levels/one.lvl"),
+                self.graphics.width,
+                self.graphics.height / 2,
+                &self.graphics.texture_manager,
+            ),
+            1 => self.levels.get_mut(1).unwrap().load(
+                Path::new("resources/levels/two.lvl"),
+                self.graphics.width,
+                self.graphics.height / 2,
+                &self.graphics.texture_manager,
+            ),
+            2 => self.levels.get_mut(2).unwrap().load(
+                Path::new("resources/levels/three.lvl"),
+                self.graphics.width,
+                self.graphics.height / 2,
+                &self.graphics.texture_manager,
+            ),
+            3 => self.levels.get_mut(3).unwrap().load(
+                Path::new("resources/levels/three.lvl"),
+                self.graphics.width,
+                self.graphics.height / 2,
+                &self.graphics.texture_manager,
+            ),
+            _ => eprintln!("Illegal level!"),
+        }
+    }
+
+    fn reset_player(&mut self) {
+        if let Some(ref mut player) = self.player {
+            player.size = PLAYER_SIZE;
+            player.position = glm::vec2(
+                (self.graphics.width as f32 / 2.0) - (player.size.x / 2.0),
+                self.graphics.height as f32 - PLAYER_SIZE.y,
+            );
+            if let Some(ref mut ball) = self.ball {
+                ball.reset(
+                    player.position
+                        + glm::vec2(PLAYER_SIZE.x / 2.0 - BALL_RADIUS, -(BALL_RADIUS * 2.0)),
+                    INITIAL_BALL_VELOCITY,
+                );
+            }
+        }
     }
 
     fn do_collisions(&mut self) {
