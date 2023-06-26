@@ -91,9 +91,12 @@ impl Shader {
         gl::Uniform1f(gl::GetUniformLocation(self.id, name.as_ptr()), value);
     }
 
-    pub unsafe fn set_vec2(&self, name: &CStr, value: &Vec2) {
+    pub unsafe fn set_vec2(&self, name: &str, value: &Vec2) {
         gl::Uniform2fv(
-            gl::GetUniformLocation(self.id, name.as_ptr()),
+            gl::GetUniformLocation(
+                self.id,
+                CStr::from_bytes_with_nul_unchecked(name.as_bytes()).as_ptr(),
+            ),
             1,
             value.as_ptr(),
         );
@@ -120,9 +123,12 @@ impl Shader {
         gl::Uniform3f(gl::GetUniformLocation(self.id, name.as_ptr()), x, y, z);
     }
 
-    pub unsafe fn set_vec4(&self, name: &CStr, value: &Vec4) {
+    pub unsafe fn set_vec4(&self, name: &str, value: &Vec4) {
         gl::Uniform4fv(
-            gl::GetUniformLocation(self.id, name.as_ptr()),
+            gl::GetUniformLocation(
+                self.id,
+                CStr::from_bytes_with_nul_unchecked(name.as_bytes()).as_ptr(),
+            ),
             1,
             value.as_ptr(),
         );

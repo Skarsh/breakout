@@ -1,6 +1,5 @@
 use std::{ops::Neg, path::Path};
 
-use image::imageops::colorops::contrast_in_place;
 use nalgebra_glm as glm;
 
 use crate::{

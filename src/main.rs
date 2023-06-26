@@ -22,6 +22,8 @@ mod game_object;
 
 mod game_level;
 
+mod particle_generator;
+
 // settings
 const SCR_WIDTH: u32 = 800;
 const SCR_HEIGHT: u32 = 600;
