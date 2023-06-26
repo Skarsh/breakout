@@ -28,20 +28,41 @@ pub struct Game {
     pub graphics: Graphics,
     levels: Vec<GameLevel>,
     level: u32,
-    player: Option<GameObject>,
-    ball: Option<Ball>,
+    player: GameObject,
+    ball: Ball,
 }
 
 impl Game {
     pub fn new(graphics: Graphics) -> Self {
+        // Player
+        let player_pos = glm::vec2(
+            graphics.width as f32 / 2.0 - PLAYER_SIZE.x / 2.0,
+            graphics.height as f32 - PLAYER_SIZE.y,
+        );
+
+        let player = GameObject {
+            position: player_pos,
+            size: PLAYER_SIZE,
+            velocity: glm::vec2(0.0, 0.0),
+            color: glm::vec3(1.0, 1.0, 1.0),
+            rotation: 0.0,
+            is_solid: false,
+            destroyed: false,
+            sprite_id: String::from("paddle"),
+        };
+
+        let ball_pos =
+            player_pos + glm::vec2(PLAYER_SIZE.x / 2.0 - BALL_RADIUS, -BALL_RADIUS * 2.0);
+        let ball = Ball::new(ball_pos, BALL_RADIUS, true);
+
         Self {
             state: GameState::Active,
             keys: [false; 1024],
             graphics,
             levels: vec![],
             level: 0,
-            player: None,
-            ball: None,
+            player,
+            ball,
         }
     }
 
@@ -107,28 +128,6 @@ impl Game {
             "paddle",
         );
 
-        // Player
-        let player_pos = glm::vec2(
-            self.graphics.width as f32 / 2.0 - PLAYER_SIZE.x / 2.0,
-            self.graphics.height as f32 - PLAYER_SIZE.y,
-        );
-
-        self.player = Some(GameObject {
-            position: player_pos,
-            size: PLAYER_SIZE,
-            velocity: glm::vec2(0.0, 0.0),
-            color: glm::vec3(1.0, 1.0, 1.0),
-            rotation: 0.0,
-            is_solid: false,
-            destroyed: false,
-            sprite_id: String::from("paddle"),
-        });
-
-        // Ball
-        let ball_pos =
-            player_pos + glm::vec2(PLAYER_SIZE.x / 2.0 - BALL_RADIUS, -BALL_RADIUS * 2.0);
-        self.ball = Some(Ball::new(ball_pos, BALL_RADIUS, true));
-
         // load levels
         let mut one = GameLevel { bricks: vec![] };
         one.load(
@@ -169,49 +168,35 @@ impl Game {
                 let velocity = PLAYER_VELOCITY * dt as f32;
                 // move player paddle
                 if self.keys[glfw::Key::A as usize] {
-                    if let Some(ref mut player) = self.player {
-                        if player.position.x >= 0.0 {
-                            player.position.x -= velocity;
-                            if let Some(ref mut ball) = self.ball {
-                                if ball.stuck {
-                                    ball.set_x(ball.position().x - velocity);
-                                }
-                            }
+                    if self.player.position.x >= 0.0 {
+                        self.player.position.x -= velocity;
+                        if self.ball.stuck {
+                            self.ball.set_x(self.ball.position().x - velocity);
                         }
                     }
                 }
                 if self.keys[glfw::Key::D as usize] {
-                    if let Some(ref mut player) = self.player {
-                        if player.position.x <= self.graphics.width as f32 - player.size.x {
-                            player.position.x += velocity;
-                            if let Some(ref mut ball) = self.ball {
-                                if ball.stuck {
-                                    ball.set_x(ball.position().x + velocity);
-                                }
-                            }
+                    if self.player.position.x <= self.graphics.width as f32 - self.player.size.x {
+                        self.player.position.x += velocity;
+                        if self.ball.stuck {
+                            self.ball.set_x(self.ball.position().x + velocity);
                         }
                     }
                 }
 
                 if self.keys[glfw::Key::Space as usize] {
-                    if let Some(ref mut ball) = self.ball {
-                        ball.stuck = false;
-                    }
+                    self.ball.stuck = false;
                 }
             }
         }
     }
 
     pub fn update(&mut self, dt: f64) {
-        if let Some(ref mut ball) = self.ball {
-            ball.move_ball(dt as f32, self.graphics.width);
-            self.do_collisions();
-        }
-        if let Some(ref mut ball) = self.ball {
-            if ball.position().y >= self.graphics.height as f32 {
-                self.reset_level();
-                self.reset_player();
-            }
+        self.ball.move_ball(dt as f32, self.graphics.width);
+        self.do_collisions();
+        if self.ball.position().y >= self.graphics.height as f32 {
+            self.reset_level();
+            self.reset_player();
         }
     }
 
@@ -225,18 +210,14 @@ impl Game {
                         &self.graphics.texture_manager,
                     );
                 }
-                if let Some(player) = &self.player {
-                    player.draw(
-                        &mut self.graphics.sprite_renderer,
-                        &self.graphics.texture_manager.get_texture("paddle"),
-                    );
-                }
-                if let Some(ball) = &self.ball {
-                    ball.draw(
-                        &mut self.graphics.sprite_renderer,
-                        &self.graphics.texture_manager.get_texture("ball"),
-                    );
-                }
+                self.player.draw(
+                    &mut self.graphics.sprite_renderer,
+                    &self.graphics.texture_manager.get_texture("paddle"),
+                );
+                self.ball.draw(
+                    &mut self.graphics.sprite_renderer,
+                    &self.graphics.texture_manager.get_texture("ball"),
+                );
             }
             _ => panic!("Illegal state"),
         }
@@ -277,81 +258,71 @@ impl Game {
     }
 
     fn reset_player(&mut self) {
-        if let Some(ref mut player) = self.player {
-            player.size = PLAYER_SIZE;
-            player.position = glm::vec2(
-                (self.graphics.width as f32 / 2.0) - (player.size.x / 2.0),
-                self.graphics.height as f32 - PLAYER_SIZE.y,
-            );
-            if let Some(ref mut ball) = self.ball {
-                ball.reset(
-                    player.position
-                        + glm::vec2(PLAYER_SIZE.x / 2.0 - BALL_RADIUS, -(BALL_RADIUS * 2.0)),
-                    INITIAL_BALL_VELOCITY,
-                );
-            }
-        }
+        self.player.size = PLAYER_SIZE;
+        self.player.position = glm::vec2(
+            (self.graphics.width as f32 / 2.0) - (self.player.size.x / 2.0),
+            self.graphics.height as f32 - PLAYER_SIZE.y,
+        );
+        self.ball.reset(
+            self.player.position
+                + glm::vec2(PLAYER_SIZE.x / 2.0 - BALL_RADIUS, -(BALL_RADIUS * 2.0)),
+            INITIAL_BALL_VELOCITY,
+        );
     }
 
     fn do_collisions(&mut self) {
         for brick in &mut self.levels[self.level as usize].bricks {
             if !brick.destroyed {
-                if let Some(ref mut ball) = self.ball {
-                    let collision = check_collision_circle(&ball, brick);
+                let collision = check_collision_circle(&self.ball, brick);
 
-                    if collision.0 {
-                        if !brick.is_solid {
-                            brick.destroyed = true;
-                        }
+                if collision.0 {
+                    if !brick.is_solid {
+                        brick.destroyed = true;
+                    }
 
-                        let dir = collision.1;
-                        let diff_vector = collision.2;
+                    let dir = collision.1;
+                    let diff_vector = collision.2;
 
-                        // Horizontal collision
-                        if dir == Direction::Left || dir == Direction::Right {
-                            ball.object.velocity.x *= -1.0;
+                    // Horizontal collision
+                    if dir == Direction::Left || dir == Direction::Right {
+                        self.ball.object.velocity.x *= -1.0;
 
-                            // relocate
-                            let penetration = ball.radius - diff_vector.x.abs();
-                            if dir == Direction::Left {
-                                // move ball to the right
-                                ball.position().x += penetration;
-                            } else {
-                                ball.position().x -= penetration;
-                            }
+                        // relocate
+                        let penetration = self.ball.radius - diff_vector.x.abs();
+                        if dir == Direction::Left {
+                            // move ball to the right
+                            self.ball.position().x += penetration;
                         } else {
-                            // vertical collision
-                            ball.object.velocity.y *= -1.0;
-                            let penetration = ball.radius - diff_vector.y.abs();
-                            if dir == Direction::Up {
-                                // move ball back up
-                                ball.position().y -= penetration;
-                            } else {
-                                ball.position().y += penetration;
-                            }
+                            self.ball.position().x -= penetration;
+                        }
+                    } else {
+                        // vertical collision
+                        self.ball.object.velocity.y *= -1.0;
+                        let penetration = self.ball.radius - diff_vector.y.abs();
+                        if dir == Direction::Up {
+                            // move ball back up
+                            self.ball.position().y -= penetration;
+                        } else {
+                            self.ball.position().y += penetration;
                         }
                     }
                 }
             }
         }
-        if let Some(ref mut ball) = self.ball {
-            if let Some(ref player) = self.player {
-                let result = check_collision_circle(&ball, &player);
-                if !ball.stuck && result.0 {
-                    // check where it hit the board, and change directin accordingly
-                    let center_board = player.position.x + player.size.x / 2.0;
-                    let distance = (ball.position().x + ball.radius) - center_board;
-                    let percentage = distance / (player.size.x / 2.0);
+        let result = check_collision_circle(&self.ball, &self.player);
+        if !self.ball.stuck && result.0 {
+            // check where it hit the board, and change directin accordingly
+            let center_board = self.player.position.x + self.player.size.x / 2.0;
+            let distance = (self.ball.position().x + self.ball.radius) - center_board;
+            let percentage = distance / (self.player.size.x / 2.0);
 
-                    // move accordingly
-                    let strength = 2.0;
-                    let old_velocity = ball.object.velocity;
-                    ball.object.velocity.x = INITIAL_BALL_VELOCITY.x * percentage * strength;
-                    ball.object.velocity.y = -1.0 * ball.object.velocity.y.abs();
-                    ball.object.velocity =
-                        glm::normalize(&ball.object.velocity) * glm::length(&old_velocity);
-                }
-            }
+            // move accordingly
+            let strength = 2.0;
+            let old_velocity = self.ball.object.velocity;
+            self.ball.object.velocity.x = INITIAL_BALL_VELOCITY.x * percentage * strength;
+            self.ball.object.velocity.y = -1.0 * self.ball.object.velocity.y.abs();
+            self.ball.object.velocity =
+                glm::normalize(&self.ball.object.velocity) * glm::length(&old_velocity);
         }
     }
 }
