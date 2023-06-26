@@ -26,7 +26,6 @@ impl ShaderManager {
             load_shader_from_file(v_shader_file, f_shader_file, g_shader_file).into(),
         );
         // TODO: Deal with unwrap
-        //self.shaders.get(&name).unwrap().clone()
         self.shaders.get(&name).unwrap().clone()
     }
 
