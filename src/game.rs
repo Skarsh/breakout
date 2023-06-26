@@ -320,9 +320,9 @@ impl Game {
             let strength = 2.0;
             let old_velocity = self.ball.object.velocity;
             self.ball.object.velocity.x = INITIAL_BALL_VELOCITY.x * percentage * strength;
-            self.ball.object.velocity.y = -1.0 * self.ball.object.velocity.y.abs();
             self.ball.object.velocity =
                 glm::normalize(&self.ball.object.velocity) * glm::length(&old_velocity);
+            self.ball.object.velocity.y = -1.0 * self.ball.object.velocity.y.abs();
         }
     }
 }
