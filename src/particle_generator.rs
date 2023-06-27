@@ -1,7 +1,4 @@
-use std::{
-    ffi::{c_void, CStr},
-    vec,
-};
+use std::{ffi::c_void, rc::Rc};
 
 use gl::types::*;
 
@@ -14,7 +11,7 @@ use crate::{
 };
 
 #[derive(Debug, Default)]
-struct Particle {
+pub struct Particle {
     position: glm::Vec2,
     velocity: glm::Vec2,
     color: glm::Vec4,
@@ -33,10 +30,10 @@ impl Particle {
 }
 
 #[derive(Debug)]
-struct ParticleGenerator {
+pub struct ParticleGenerator {
     particles: Vec<Particle>,
     amount: u32,
-    shader: Shader,
+    shader: Rc<Shader>,
     texture: Texture2D,
     vao: u32,
     last_used_particle: usize,
@@ -44,9 +41,7 @@ struct ParticleGenerator {
 }
 
 impl ParticleGenerator {
-    pub fn new(shader: Shader, texture: Texture2D, amount: u32) -> Self {
-        // TODO: call init?
-
+    pub fn new(shader: Rc<Shader>, texture: Texture2D, amount: u32) -> Self {
         Self {
             particles: Vec::new(),
             amount,
@@ -66,21 +61,21 @@ impl ParticleGenerator {
                 self.amount,
                 &self.particles,
             );
-            Self::respawn_particle(
-                self.particles.get_mut(unused_particle).unwrap(),
-                object,
-                offset,
-            );
+
+            if let Some(particle) = self.particles.get_mut(unused_particle) {
+                Self::respawn_particle(particle, object, offset);
+            }
         }
 
         // update all particles
         for i in 0..self.amount {
-            let particle = self.particles.get_mut(i as usize).unwrap();
-            particle.life -= dt;
-            if particle.life > 0.0 {
-                // particle is alive, thus update
-                particle.position -= particle.velocity * dt;
-                particle.color.w -= dt * 2.5;
+            if let Some(particle) = self.particles.get_mut(i as usize) {
+                particle.life -= dt;
+                if particle.life > 0.0 {
+                    // particle is alive, thus update
+                    particle.position -= particle.velocity * dt;
+                    particle.color.w -= dt * 2.5;
+                }
             }
         }
     }
@@ -150,16 +145,18 @@ impl ParticleGenerator {
         }
     }
 
-    pub fn first_unused_particle(
+    fn first_unused_particle(
         last_used_particle: &mut usize,
         amount: u32,
         particles: &Vec<Particle>,
     ) -> usize {
         // first search from last used particle, this will usually return almost instantly
         for i in *last_used_particle..amount as usize {
-            if particles.get(i).unwrap().life <= 0.0 {
-                *last_used_particle = i;
-                return i;
+            if let Some(particle) = particles.get(i) {
+                if particle.life <= 0.0 {
+                    *last_used_particle = i;
+                    return i;
+                }
             }
         }
 
@@ -175,8 +172,8 @@ impl ParticleGenerator {
         0
     }
 
-    pub fn respawn_particle(particle: &mut Particle, object: &GameObject, offset: glm::Vec2) {
-        let random_val = ((random::<u32>() % 100) - 50) as f32 / 10.0;
+    fn respawn_particle(particle: &mut Particle, object: &GameObject, offset: glm::Vec2) {
+        let random_val = ((random::<i32>() % 100) - 50) as f32 / 10.0;
         let random_color = 0.5 + ((random::<u32>() % 100) as f32 / 100.0);
 
         particle.position.x = object.position.x + random_val + offset.x;
