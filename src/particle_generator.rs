@@ -103,7 +103,7 @@ impl ParticleGenerator {
 
     pub fn init(&mut self) {
         // set up mesh and attribute properties
-        let vbo = 0;
+        let mut vbo = 0;
         #[rustfmt::skip]
         let particle_quad: [f32; 24] = [
             0.0, 1.0, 0.0, 1.0,
@@ -115,8 +115,8 @@ impl ParticleGenerator {
         ];
 
         unsafe {
-            gl::GenVertexArrays(1, self.vao as *mut u32);
-            gl::GenBuffers(1, vbo as *mut u32);
+            gl::GenVertexArrays(1, &mut self.vao);
+            gl::GenBuffers(1, &mut vbo);
             gl::BindVertexArray(self.vao);
 
             // fill mesh buffer
