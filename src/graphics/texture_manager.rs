@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::{collections::HashMap, path::Path};
 
 use super::texture::Texture2D;

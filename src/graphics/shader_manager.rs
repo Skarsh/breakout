@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::{collections::HashMap, ffi::CString, fs::File, io::Read, path::Path, rc::Rc};
 
 use super::shader::Shader;

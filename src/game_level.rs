@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::{fs, path::Path};
 
 use nalgebra_glm as glm;
@@ -42,6 +43,8 @@ impl GameLevel {
             }
             tile_data.push(char_line);
         }
+
+        #[allow(clippy::len_zero)]
         if tile_data.len() > 0 {
             self.init(tile_data, level_width, level_height, texture_manager);
         }
@@ -50,7 +53,7 @@ impl GameLevel {
     pub fn draw(&mut self, renderer: &mut SpriteRenderer, texture_manager: &TextureManager) {
         for tile in self.bricks.iter_mut() {
             if !tile.destroyed {
-                let texture = texture_manager.get_texture(&tile.sprite_id());
+                let texture = texture_manager.get_texture(tile.sprite_id());
                 tile.draw(renderer, texture);
             }
         }
@@ -81,7 +84,7 @@ impl GameLevel {
         //for y in 0..height {
         for (y, _) in tile_data.iter().enumerate() {
             for (x, _) in tile_data[y].iter().enumerate() {
-                let pos = glm::vec2(unit_width * x as f32, unit_height as f32 * y as f32);
+                let pos = glm::vec2(unit_width * x as f32, unit_height * y as f32);
                 let size = glm::vec2(unit_width, unit_height);
                 let velocity = glm::vec2(0.0, 0.0);
                 let mut obj = GameObject {

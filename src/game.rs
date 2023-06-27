@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::{ops::Neg, path::Path};
 
 use nalgebra_glm as glm;
@@ -202,21 +204,21 @@ impl Game {
             GameState::Win => {}
             GameState::Active => {
                 let velocity = PLAYER_VELOCITY * dt as f32;
+
                 // move player paddle
-                if self.keys[glfw::Key::A as usize] {
-                    if self.player.position.x >= 0.0 {
-                        self.player.position.x -= velocity;
-                        if self.ball.stuck {
-                            self.ball.set_x(self.ball.position().x - velocity);
-                        }
+                if self.keys[glfw::Key::A as usize] && self.player.position.x >= 0.0 {
+                    self.player.position.x -= velocity;
+                    if self.ball.stuck {
+                        self.ball.set_x(self.ball.position().x - velocity);
                     }
                 }
-                if self.keys[glfw::Key::D as usize] {
-                    if self.player.position.x <= self.graphics.width as f32 - self.player.size.x {
-                        self.player.position.x += velocity;
-                        if self.ball.stuck {
-                            self.ball.set_x(self.ball.position().x + velocity);
-                        }
+
+                if self.keys[glfw::Key::D as usize]
+                    && self.player.position.x <= self.graphics.width as f32 - self.player.size.x
+                {
+                    self.player.position.x += velocity;
+                    if self.ball.stuck {
+                        self.ball.set_x(self.ball.position().x + velocity);
                     }
                 }
 
@@ -254,12 +256,12 @@ impl Game {
                 }
                 self.player.draw(
                     &mut self.graphics.sprite_renderer,
-                    &self.graphics.texture_manager.get_texture("paddle"),
+                    self.graphics.texture_manager.get_texture("paddle"),
                 );
                 self.particle_generator.as_ref().unwrap().draw();
                 self.ball.draw(
                     &mut self.graphics.sprite_renderer,
-                    &self.graphics.texture_manager.get_texture("ball"),
+                    self.graphics.texture_manager.get_texture("ball"),
                 );
             }
             _ => panic!("Illegal state"),
@@ -412,7 +414,9 @@ fn vector_direction(target: glm::Vec2) -> Direction {
 
     let mut max = 0.0;
     let mut best_match = Direction::Up;
-    for i in 0..4 {
+
+    #[allow(clippy::needless_range_loop)]
+    for i in 0..compass.len() {
         let dot_product = glm::dot(&glm::normalize(&target), &compass[i]);
 
         if dot_product.is_nan() {

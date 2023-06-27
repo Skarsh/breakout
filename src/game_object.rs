@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use nalgebra_glm as glm;
 
 use crate::{graphics::sprite_renderer::SpriteRenderer, graphics::texture::Texture2D};

@@ -74,7 +74,7 @@ pub fn main() {
     game.init();
 
     // deltatime vairables
-    let mut delta_time = 0.0;
+    let mut delta_time;
     let mut last_frame = 0.0;
 
     while !window.should_close() {

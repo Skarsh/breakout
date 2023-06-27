@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::{ffi::c_void, rc::Rc};
 
 use gl::types::*;
@@ -148,7 +149,7 @@ impl ParticleGenerator {
     fn first_unused_particle(
         last_used_particle: &mut usize,
         amount: u32,
-        particles: &Vec<Particle>,
+        particles: &[Particle],
     ) -> usize {
         // first search from last used particle, this will usually return almost instantly
         for i in *last_used_particle..amount as usize {
