@@ -64,7 +64,7 @@ impl ParticleGenerator {
             );
 
             if let Some(particle) = self.particles.get_mut(unused_particle) {
-                Self::respawn_particle(particle, object, offset);
+                Self::respawn_particle(particle, object, offset, &mut self.rand);
             }
         }
 
@@ -173,9 +173,14 @@ impl ParticleGenerator {
         0
     }
 
-    fn respawn_particle(particle: &mut Particle, object: &GameObject, offset: glm::Vec2) {
-        let random_val = ((random::<i32>() % 100) - 50) as f32 / 10.0;
-        let random_color = 0.5 + ((random::<u32>() % 100) as f32 / 100.0);
+    fn respawn_particle(
+        particle: &mut Particle,
+        object: &GameObject,
+        offset: glm::Vec2,
+        thread_rng: &mut ThreadRng,
+    ) {
+        let random_val = ((thread_rng.gen_range(0..40_000) % 100) - 50) as f32 / 10.0;
+        let random_color = 0.5 + ((random::<i32>() % 100) as f32 / 100.0);
 
         particle.position.x = object.position.x + random_val + offset.x;
         particle.position.y = object.position.y + random_val + offset.y;
