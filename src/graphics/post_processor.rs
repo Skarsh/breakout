@@ -16,7 +16,7 @@ pub struct PostProcessor {
     height: i32,
     chaos: bool,
     confuse: bool,
-    shake: bool,
+    pub shake: bool,
     msfbo: u32, // MSFBO = Multisampled FBO. FBO is regular, used for blitting MS color-buffer to texture.
     fbo: u32,
     rbo: u32, // RBO is used for multisampled color buffer.

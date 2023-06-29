@@ -36,6 +36,7 @@ pub struct Game {
     ball: Ball,
     particle_generator: Option<ParticleGenerator>,
     effects: Option<PostProcessor>,
+    shake_time: f32,
 }
 
 impl Game {
@@ -71,6 +72,7 @@ impl Game {
             ball,
             particle_generator: None,
             effects: None,
+            shake_time: 0.0,
         }
     }
 
@@ -259,6 +261,13 @@ impl Game {
             self.reset_level();
             self.reset_player();
         }
+
+        if self.shake_time > 0.0 {
+            self.shake_time -= dt as f32;
+            if self.shake_time <= 0.0 {
+                self.effects.as_mut().unwrap().shake = false;
+            }
+        }
     }
 
     pub fn render(&mut self) {
@@ -345,6 +354,9 @@ impl Game {
                 if collision.0 {
                     if !brick.is_solid {
                         brick.destroyed = true;
+                    } else {
+                        self.shake_time = 0.05;
+                        self.effects.as_mut().unwrap().shake = true;
                     }
 
                     let dir = collision.1;
