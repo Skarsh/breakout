@@ -10,7 +10,6 @@ use crate::{
     game_level::GameLevel,
     game_object::GameObject,
     graphics::post_processor::PostProcessor,
-    graphics::sprite_renderer::SpriteRenderer,
     graphics::Graphics,
     particle_generator::ParticleGenerator,
 };
@@ -34,7 +33,7 @@ pub struct Game {
     level: u32,
     player: GameObject,
     ball: Ball,
-    particle_generator: Option<ParticleGenerator>,
+    particle_generator: ParticleGenerator,
     effects: PostProcessor,
     shake_time: f32,
 }
@@ -62,6 +61,23 @@ impl Game {
             player_pos + glm::vec2(PLAYER_SIZE.x / 2.0 - BALL_RADIUS, -BALL_RADIUS * 2.0);
         let ball = Ball::new(ball_pos, BALL_RADIUS, true);
 
+        let particle_shader = graphics.shader_manager.load_shader(
+            Path::new("shaders/particle.vs"),
+            Path::new("shaders/particle.frag"),
+            None,
+            "particle".to_string(),
+        );
+
+        let particle_texture = graphics.texture_manager.load_texture(
+            Path::new("resources/textures/particle.png"),
+            true,
+            "particle",
+        );
+
+        let mut particle_generator =
+            ParticleGenerator::new(particle_shader, particle_texture.clone(), 500);
+        particle_generator.init();
+
         let post_processor_shader = graphics.shader_manager.load_shader(
             Path::new("shaders/post_processing.vs"),
             Path::new("shaders/post_processing.frag"),
@@ -83,7 +99,7 @@ impl Game {
             level: 0,
             player,
             ball,
-            particle_generator: None,
+            particle_generator,
             effects,
             shake_time: 0.0,
         }
@@ -91,18 +107,11 @@ impl Game {
 
     pub fn init(&mut self) {
         // load shaders
-        let shader = self.graphics.shader_manager.load_shader(
+        let _shader = self.graphics.shader_manager.load_shader(
             Path::new("shaders/sprite.vs"),
             Path::new("shaders/sprite.frag"),
             None,
             "sprite".to_string(),
-        );
-
-        let particle_shader = self.graphics.shader_manager.load_shader(
-            Path::new("shaders/particle.vs"),
-            Path::new("shaders/particle.frag"),
-            None,
-            "particle".to_string(),
         );
 
         // configure shaders
@@ -166,24 +175,6 @@ impl Game {
             true,
             "paddle",
         );
-
-        self.graphics.texture_manager.load_texture(
-            Path::new("resources/textures/particle.png"),
-            true,
-            "particle",
-        );
-
-        // set render-specific controls
-        let _renderer = SpriteRenderer::new(shader);
-        self.particle_generator = Some(ParticleGenerator::new(
-            particle_shader,
-            self.graphics
-                .texture_manager
-                .get_texture("particle")
-                .clone(),
-            500,
-        ));
-        self.particle_generator.as_mut().unwrap().init();
 
         // load levels
         let mut one = GameLevel { bricks: vec![] };
@@ -251,7 +242,7 @@ impl Game {
     pub fn update(&mut self, dt: f64) {
         self.ball.move_ball(dt as f32, self.graphics.width);
         self.do_collisions();
-        self.particle_generator.as_mut().unwrap().update(
+        self.particle_generator.update(
             dt as f32,
             &self.ball.object,
             2,
@@ -285,7 +276,7 @@ impl Game {
                     &mut self.graphics.sprite_renderer,
                     self.graphics.texture_manager.get_texture("paddle"),
                 );
-                self.particle_generator.as_ref().unwrap().draw();
+                self.particle_generator.draw();
                 self.ball.draw(
                     &mut self.graphics.sprite_renderer,
                     self.graphics.texture_manager.get_texture("ball"),
