@@ -35,9 +35,9 @@ impl Texture2D {
         }
     }
 
-    pub fn generate(&mut self, width: u32, height: u32, data: &[u8]) {
-        self.width = width;
-        self.height = height;
+    pub fn generate(&mut self, width: i32, height: i32, data: &[u8]) {
+        self.width = width as u32;
+        self.height = height as u32;
 
         // create texture
         unsafe {

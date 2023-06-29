@@ -43,7 +43,11 @@ fn load_texture_from_file(file: &Path, alpha: bool) -> Texture2D {
     }
 
     let image = image::open(file).unwrap();
-    texture.generate(image.width(), image.height(), image.as_bytes());
+    texture.generate(
+        image.width() as i32,
+        image.height() as i32,
+        image.as_bytes(),
+    );
 
     texture
 }
