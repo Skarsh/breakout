@@ -144,13 +144,3 @@ fn process_events(
         }
     }
 }
-
-//fn key_callback(window: &mut glfw::Window, game: &mut Game, key: glfw::Key, scancode: glfw::Scancode, action: glfw::Action) {
-//    if key == glfw::Key::Escape && action == glfw::Action::Press {
-//        window.set_should_close(true);
-//    }
-//
-//    if action == glfw::Action::Press {
-//        game.keys[key.get_scancode().unwrap() as usize] = true;
-//    }
-//}
