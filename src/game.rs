@@ -105,8 +105,6 @@ impl Game {
             "particle".to_string(),
         );
 
-        let post_processor_shader = self.graphics.shader_manager.get_shader("postprocessing");
-
         // configure shaders
         let projection = glm::ortho(
             0.0,
