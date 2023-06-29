@@ -1,11 +1,16 @@
-use std::ffi::{c_void, CStr};
+#![allow(dead_code)]
+use std::{
+    ffi::{c_void, CStr},
+    rc::Rc,
+};
 
 use gl::types::{GLsizei, GLsizeiptr};
 
 use super::{shader::Shader, texture::Texture2D};
 
-struct PostProcessor {
-    post_processing_shader: Shader,
+#[derive(Debug)]
+pub struct PostProcessor {
+    post_processing_shader: Rc<Shader>,
     texture: Texture2D,
     width: i32,
     height: i32,
@@ -19,7 +24,7 @@ struct PostProcessor {
 }
 
 impl PostProcessor {
-    pub fn new(shader: Shader, width: i32, height: i32) -> Self {
+    pub fn new(shader: Rc<Shader>, width: i32, height: i32) -> Self {
         let mut msfbo = 0;
         let mut fbo = 0;
         let mut rbo = 0;
@@ -59,7 +64,7 @@ impl PostProcessor {
         unsafe {
             gl::GenFramebuffers(1, &mut msfbo);
             gl::GenFramebuffers(1, &mut fbo);
-            gl::GenFramebuffers(1, &mut rbo);
+            gl::GenRenderbuffers(1, &mut rbo);
 
             // initialize renderbuffer storage with multisampled color buffer (don't need depth/stencil buffer)
             gl::BindFramebuffer(gl::FRAMEBUFFER, msfbo);
@@ -67,6 +72,13 @@ impl PostProcessor {
 
             // allocate storage for render buffer object
             gl::RenderbufferStorageMultisample(gl::RENDERBUFFER, 4, gl::RGB, width, height);
+
+            gl::FramebufferRenderbuffer(
+                gl::FRAMEBUFFER,
+                gl::COLOR_ATTACHMENT0,
+                gl::RENDERBUFFER,
+                rbo,
+            );
 
             // attach MS render buffer object to framebuffer
             if gl::CheckFramebufferStatus(gl::FRAMEBUFFER) != gl::FRAMEBUFFER_COMPLETE {

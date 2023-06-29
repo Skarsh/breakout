@@ -2,12 +2,14 @@
 
 use std::{ops::Neg, path::Path};
 
+use glfw::ffi::glfwGetTime;
 use nalgebra_glm as glm;
 
 use crate::{
     ball::{Ball, BALL_RADIUS, INITIAL_BALL_VELOCITY},
     game_level::GameLevel,
     game_object::GameObject,
+    graphics::post_processor::PostProcessor,
     graphics::sprite_renderer::SpriteRenderer,
     graphics::Graphics,
     particle_generator::ParticleGenerator,
@@ -33,6 +35,7 @@ pub struct Game {
     player: GameObject,
     ball: Ball,
     particle_generator: Option<ParticleGenerator>,
+    effects: Option<PostProcessor>,
 }
 
 impl Game {
@@ -67,6 +70,7 @@ impl Game {
             player,
             ball,
             particle_generator: None,
+            effects: None,
         }
     }
 
@@ -84,6 +88,13 @@ impl Game {
             Path::new("shaders/particle.frag"),
             None,
             "particle".to_string(),
+        );
+
+        let post_processor_shader = self.graphics.shader_manager.load_shader(
+            Path::new("shaders/post_processing.vs"),
+            Path::new("shaders/post_processing.frag"),
+            None,
+            "postprocessing".to_string(),
         );
 
         // configure shaders
@@ -166,6 +177,12 @@ impl Game {
         ));
         self.particle_generator.as_mut().unwrap().init();
 
+        self.effects = Some(PostProcessor::new(
+            post_processor_shader,
+            self.graphics.width as i32,
+            self.graphics.height as i32,
+        ));
+
         // load levels
         let mut one = GameLevel { bricks: vec![] };
         one.load(
@@ -247,6 +264,7 @@ impl Game {
     pub fn render(&mut self) {
         match self.state {
             GameState::Active => {
+                self.effects.as_ref().unwrap().begin_render();
                 self.graphics.render();
                 if let Some(level) = self.levels.get_mut(self.level as usize) {
                     level.draw(
@@ -263,6 +281,10 @@ impl Game {
                     &mut self.graphics.sprite_renderer,
                     self.graphics.texture_manager.get_texture("ball"),
                 );
+                self.effects.as_ref().unwrap().end_render();
+                unsafe {
+                    self.effects.as_ref().unwrap().render(glfwGetTime() as f32);
+                }
             }
             _ => panic!("Illegal state"),
         }

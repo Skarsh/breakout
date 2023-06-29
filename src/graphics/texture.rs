@@ -42,17 +42,31 @@ impl Texture2D {
         // create texture
         unsafe {
             gl::BindTexture(gl::TEXTURE_2D, self.id);
-            gl::TexImage2D(
-                gl::TEXTURE_2D,
-                0,
-                self.internal_format,
-                width as i32,
-                height as i32,
-                0,
-                self.image_format,
-                gl::UNSIGNED_BYTE,
-                &data[0] as *const u8 as *const c_void,
-            );
+            if data.is_empty() {
+                gl::TexImage2D(
+                    gl::TEXTURE_2D,
+                    0,
+                    self.internal_format,
+                    width,
+                    height,
+                    0,
+                    self.image_format,
+                    gl::UNSIGNED_BYTE,
+                    std::ptr::null(),
+                );
+            } else {
+                gl::TexImage2D(
+                    gl::TEXTURE_2D,
+                    0,
+                    self.internal_format,
+                    width,
+                    height,
+                    0,
+                    self.image_format,
+                    gl::UNSIGNED_BYTE,
+                    &data[0] as *const u8 as *const c_void,
+                );
+            }
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, self.wrap_s as i32);
             gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, self.wrap_t as i32);
             gl::TextureParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, self.filter_min);
