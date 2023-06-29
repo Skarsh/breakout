@@ -35,12 +35,12 @@ pub struct Game {
     player: GameObject,
     ball: Ball,
     particle_generator: Option<ParticleGenerator>,
-    effects: Option<PostProcessor>,
+    effects: PostProcessor,
     shake_time: f32,
 }
 
 impl Game {
-    pub fn new(graphics: Graphics) -> Self {
+    pub fn new(mut graphics: Graphics) -> Self {
         // Player
         let player_pos = glm::vec2(
             graphics.width as f32 / 2.0 - PLAYER_SIZE.x / 2.0,
@@ -62,6 +62,19 @@ impl Game {
             player_pos + glm::vec2(PLAYER_SIZE.x / 2.0 - BALL_RADIUS, -BALL_RADIUS * 2.0);
         let ball = Ball::new(ball_pos, BALL_RADIUS, true);
 
+        let post_processor_shader = graphics.shader_manager.load_shader(
+            Path::new("shaders/post_processing.vs"),
+            Path::new("shaders/post_processing.frag"),
+            None,
+            "postprocessing".to_string(),
+        );
+
+        let effects = PostProcessor::new(
+            post_processor_shader,
+            graphics.width as i32,
+            graphics.height as i32,
+        );
+
         Self {
             state: GameState::Active,
             keys: [false; 1024],
@@ -71,7 +84,7 @@ impl Game {
             player,
             ball,
             particle_generator: None,
-            effects: None,
+            effects,
             shake_time: 0.0,
         }
     }
@@ -92,12 +105,7 @@ impl Game {
             "particle".to_string(),
         );
 
-        let post_processor_shader = self.graphics.shader_manager.load_shader(
-            Path::new("shaders/post_processing.vs"),
-            Path::new("shaders/post_processing.frag"),
-            None,
-            "postprocessing".to_string(),
-        );
+        let post_processor_shader = self.graphics.shader_manager.get_shader("postprocessing");
 
         // configure shaders
         let projection = glm::ortho(
@@ -179,12 +187,6 @@ impl Game {
         ));
         self.particle_generator.as_mut().unwrap().init();
 
-        self.effects = Some(PostProcessor::new(
-            post_processor_shader,
-            self.graphics.width as i32,
-            self.graphics.height as i32,
-        ));
-
         // load levels
         let mut one = GameLevel { bricks: vec![] };
         one.load(
@@ -265,7 +267,7 @@ impl Game {
         if self.shake_time > 0.0 {
             self.shake_time -= dt as f32;
             if self.shake_time <= 0.0 {
-                self.effects.as_mut().unwrap().shake = false;
+                self.effects.shake = false;
             }
         }
     }
@@ -273,7 +275,7 @@ impl Game {
     pub fn render(&mut self) {
         match self.state {
             GameState::Active => {
-                self.effects.as_ref().unwrap().begin_render();
+                self.effects.begin_render();
                 self.graphics.render();
                 if let Some(level) = self.levels.get_mut(self.level as usize) {
                     level.draw(
@@ -290,9 +292,9 @@ impl Game {
                     &mut self.graphics.sprite_renderer,
                     self.graphics.texture_manager.get_texture("ball"),
                 );
-                self.effects.as_ref().unwrap().end_render();
+                self.effects.end_render();
                 unsafe {
-                    self.effects.as_ref().unwrap().render(glfwGetTime() as f32);
+                    self.effects.render(glfwGetTime() as f32);
                 }
             }
             _ => panic!("Illegal state"),
@@ -356,7 +358,7 @@ impl Game {
                         brick.destroyed = true;
                     } else {
                         self.shake_time = 0.05;
-                        self.effects.as_mut().unwrap().shake = true;
+                        self.effects.shake = true;
                     }
 
                     let dir = collision.1;
