@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+pub mod post_processor;
 pub mod shader;
 pub mod shader_manager;
 pub mod sprite_renderer;

@@ -72,8 +72,14 @@ impl Shader {
         self
     }
 
-    pub unsafe fn set_bool(&self, name: &CStr, value: bool) {
-        gl::Uniform1i(gl::GetUniformLocation(self.id, name.as_ptr()), value as i32);
+    pub unsafe fn set_bool(&self, name: &str, value: bool) {
+        gl::Uniform1i(
+            gl::GetUniformLocation(
+                self.id,
+                CStr::from_bytes_with_nul_unchecked(name.as_bytes()).as_ptr(),
+            ),
+            value as i32,
+        );
     }
 
     pub fn set_int(&self, name: &str, value: i32) {
@@ -88,8 +94,14 @@ impl Shader {
         }
     }
 
-    pub unsafe fn set_float(&self, name: &CStr, value: f32) {
-        gl::Uniform1f(gl::GetUniformLocation(self.id, name.as_ptr()), value);
+    pub unsafe fn set_float(&self, name: &str, value: f32) {
+        gl::Uniform1f(
+            gl::GetUniformLocation(
+                self.id,
+                CStr::from_bytes_with_nul_unchecked(name.as_bytes()).as_ptr(),
+            ),
+            value,
+        );
     }
 
     pub unsafe fn set_vec2(&self, name: &str, value: &Vec2) {
