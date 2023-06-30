@@ -177,6 +177,7 @@ impl Game {
             2,
             glm::vec2(self.ball.radius / 2.0, self.ball.radius / 2.0),
         );
+        self.update_powerups(dt as f32);
         if self.ball.position().y >= self.graphics.height as f32 {
             self.reset_level();
             self.reset_player();
@@ -205,6 +206,16 @@ impl Game {
                     &mut self.graphics.sprite_renderer,
                     self.graphics.texture_manager.get_texture("paddle"),
                 );
+                for powerup in &self.powerups {
+                    if !powerup.object.destroyed {
+                        powerup.object.draw(
+                            &mut self.graphics.sprite_renderer,
+                            self.graphics
+                                .texture_manager
+                                .get_texture(&powerup.object.sprite_id),
+                        );
+                    }
+                }
                 self.particle_generator.draw();
                 self.ball.draw(
                     &mut self.graphics.sprite_renderer,
@@ -264,12 +275,19 @@ impl Game {
                 + glm::vec2(PLAYER_SIZE.x / 2.0 - BALL_RADIUS, -(BALL_RADIUS * 2.0)),
             INITIAL_BALL_VELOCITY,
         );
+        // also disable all active powerups
+        self.effects.chaos = false;
+        self.effects.confuse = false;
+        self.ball.passthrough = false;
+        self.ball.sticky = false;
+        self.player.color = glm::vec3(1.0, 1.0, 1.0);
+        self.ball.object.color = glm::vec3(1.0, 1.0, 1.0);
     }
 
-    fn spawn_powerups(&mut self, block: &GameObject) {
+    fn spawn_powerups(powerups: &mut Vec<PowerUp>, block: &GameObject) {
         // 1 in 75 chance
         if should_spawn(75) {
-            self.powerups.push(PowerUp::new(
+            powerups.push(PowerUp::new(
                 PowerUpType::Speed,
                 glm::vec3(0.5, 0.5, 1.0),
                 0.0,
@@ -278,7 +296,7 @@ impl Game {
             ));
         }
         if should_spawn(75) {
-            self.powerups.push(PowerUp::new(
+            powerups.push(PowerUp::new(
                 PowerUpType::Sticky,
                 glm::vec3(1.0, 0.5, 1.0),
                 20.0,
@@ -287,7 +305,7 @@ impl Game {
             ));
         }
         if should_spawn(75) {
-            self.powerups.push(PowerUp::new(
+            powerups.push(PowerUp::new(
                 PowerUpType::PassThrough,
                 glm::vec3(0.5, 1.0, 0.5),
                 10.0,
@@ -296,7 +314,7 @@ impl Game {
             ));
         }
         if should_spawn(75) {
-            self.powerups.push(PowerUp::new(
+            powerups.push(PowerUp::new(
                 PowerUpType::PadSizeIncrease,
                 glm::vec3(1.0, 0.6, 0.0),
                 0.0,
@@ -305,7 +323,7 @@ impl Game {
             ));
         }
         if should_spawn(15) {
-            self.powerups.push(PowerUp::new(
+            powerups.push(PowerUp::new(
                 PowerUpType::Confuse,
                 glm::vec3(1.0, 0.3, 0.3),
                 15.0,
@@ -314,7 +332,7 @@ impl Game {
             ));
         }
         if should_spawn(15) {
-            self.powerups.push(PowerUp::new(
+            powerups.push(PowerUp::new(
                 PowerUpType::Chaos,
                 glm::vec3(0.9, 0.25, 0.25),
                 15.0,
@@ -324,8 +342,66 @@ impl Game {
         }
     }
 
-    fn update_powerups(&self, dt: f32) {
-        unimplemented!()
+    fn update_powerups(&mut self, dt: f32) {
+        for i in 0..self.powerups.len() {
+            let delta_pos = self.powerups[i].object.velocity * dt;
+            self.powerups[i].object.position += delta_pos;
+            if self.powerups[i].activated {
+                self.powerups[i].duration -= dt;
+                if self.powerups[i].duration <= 0.0 {
+                    self.powerups[i].activated = false;
+                    let powerup_type = &self.powerups[i].r#type;
+                    match powerup_type {
+                        PowerUpType::Sticky => {
+                            if !Self::is_other_powerup_active(&self.powerups, powerup_type) {
+                                self.ball.sticky = false;
+                                self.player.color = glm::vec3(1.0, 1.0, 1.0);
+                            }
+                        }
+                        PowerUpType::PassThrough => {
+                            if !Self::is_other_powerup_active(&self.powerups, powerup_type) {
+                                self.ball.passthrough = false;
+                                self.ball.object.color = glm::vec3(1.0, 1.0, 1.0);
+                            }
+                        }
+                        PowerUpType::Confuse => {
+                            if !Self::is_other_powerup_active(&self.powerups, powerup_type) {
+                                self.effects.confuse = false;
+                            }
+                        }
+                        PowerUpType::Chaos => {
+                            if !Self::is_other_powerup_active(&self.powerups, powerup_type) {
+                                self.effects.chaos = false;
+                            }
+                        }
+                        PowerUpType::Speed => {}
+                        PowerUpType::PadSizeIncrease => {}
+                    }
+                }
+            }
+        }
+
+        // TODO: Should be possible to improve this
+        let mut indexes_to_erase = vec![];
+        for i in 0..self.powerups.len() {
+            if self.powerups[i].object.destroyed && !self.powerups[i].activated {
+                indexes_to_erase.push(i);
+            }
+        }
+        for i in 0..indexes_to_erase.len() {
+            self.powerups.remove(i);
+        }
+    }
+
+    fn is_other_powerup_active(powerups: &Vec<PowerUp>, r#type: &PowerUpType) -> bool {
+        for powerup in powerups {
+            if powerup.activated {
+                if &powerup.r#type == r#type {
+                    return true;
+                }
+            }
+        }
+        false
     }
 
     fn activate_powerup(
@@ -346,7 +422,6 @@ impl Game {
             }
             PowerUpType::PadSizeIncrease => {
                 player.size.x += 50.0;
-                player.size.y += 50.0;
             }
             PowerUpType::Confuse => {
                 if !effects.chaos {
@@ -369,6 +444,7 @@ impl Game {
                 if collision.0 {
                     if !brick.is_solid {
                         brick.destroyed = true;
+                        Self::spawn_powerups(&mut self.powerups, &brick);
                     } else {
                         self.shake_time = 0.05;
                         self.effects.shake = true;
@@ -500,6 +576,42 @@ fn load_textures(texture_manager: &mut TextureManager) {
         true,
         "particle",
     );
+
+    texture_manager.load_texture(
+        Path::new("resources/textures/powerup_speed.png"),
+        true,
+        "powerup_speed",
+    );
+
+    texture_manager.load_texture(
+        Path::new("resources/textures/powerup_sticky.png"),
+        true,
+        "powerup_sticky",
+    );
+
+    texture_manager.load_texture(
+        Path::new("resources/textures/powerup_increase.png"),
+        true,
+        "powerup_increase",
+    );
+
+    texture_manager.load_texture(
+        Path::new("resources/textures/powerup_confuse.png"),
+        true,
+        "powerup_confuse",
+    );
+
+    texture_manager.load_texture(
+        Path::new("resources/textures/powerup_chaos.png"),
+        true,
+        "powerup_chaos",
+    );
+
+    texture_manager.load_texture(
+        Path::new("resources/textures/powerup_passthrough.png"),
+        true,
+        "powerup_passthrough",
+    );
 }
 
 fn load_levels(
@@ -616,6 +728,6 @@ fn vector_direction(target: glm::Vec2) -> Direction {
 }
 
 fn should_spawn(chance: u32) -> bool {
-    let random = random::<u32>() % chance;
-    random == 0
+    let random_val = random::<u32>() % chance;
+    random_val == 0
 }

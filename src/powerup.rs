@@ -19,7 +19,7 @@ pub enum PowerUpType {
 pub struct PowerUp {
     pub object: GameObject,
     pub r#type: PowerUpType,
-    duration: f32,
+    pub duration: f32,
     pub activated: bool,
 }
 

@@ -1,8 +1,5 @@
 #![allow(dead_code)]
-use std::{
-    ffi::{c_void, CStr},
-    rc::Rc,
-};
+use std::ffi::{c_void, CStr};
 
 use gl::types::{GLsizei, GLsizeiptr};
 

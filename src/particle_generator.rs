@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use std::{ffi::c_void, rc::Rc};
+use std::ffi::c_void;
 
 use gl::types::*;
 
