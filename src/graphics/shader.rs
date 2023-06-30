@@ -7,7 +7,7 @@ use gl::types::*;
 
 use nalgebra_glm::{Mat4, Vec2, Vec3, Vec4};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Shader {
     pub id: u32,
 }

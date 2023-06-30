@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::{ops::Neg, path::Path};
+use std::{ops::Neg, path::Path, rc::Rc};
 
 use glfw::ffi::glfwGetTime;
 use nalgebra_glm as glm;
@@ -9,9 +9,10 @@ use crate::{
     ball::{Ball, BALL_RADIUS, INITIAL_BALL_VELOCITY},
     game_level::GameLevel,
     game_object::GameObject,
-    graphics::post_processor::PostProcessor,
-    graphics::Graphics,
+    graphics::{post_processor::PostProcessor, shader_manager::ShaderManager},
+    graphics::{texture_manager::TextureManager, Graphics},
     particle_generator::ParticleGenerator,
+    powerup::PowerUp,
 };
 
 #[derive(Debug)]
@@ -36,10 +37,23 @@ pub struct Game {
     particle_generator: ParticleGenerator,
     effects: PostProcessor,
     shake_time: f32,
+    powerups: Vec<PowerUp>,
 }
 
 impl Game {
     pub fn new(mut graphics: Graphics) -> Self {
+        // load textures
+        load_textures(&mut graphics.texture_manager);
+        load_shaders(&mut graphics.shader_manager);
+
+        let mut levels = vec![];
+        load_levels(
+            &mut levels,
+            graphics.width,
+            graphics.height,
+            &graphics.texture_manager,
+        );
+
         // Player
         let player_pos = glm::vec2(
             graphics.width as f32 / 2.0 - PLAYER_SIZE.x / 2.0,
@@ -61,32 +75,15 @@ impl Game {
             player_pos + glm::vec2(PLAYER_SIZE.x / 2.0 - BALL_RADIUS, -BALL_RADIUS * 2.0);
         let ball = Ball::new(ball_pos, BALL_RADIUS, true);
 
-        let particle_shader = graphics.shader_manager.load_shader(
-            Path::new("shaders/particle.vs"),
-            Path::new("shaders/particle.frag"),
-            None,
-            "particle".to_string(),
+        let mut particle_generator = ParticleGenerator::new(
+            Rc::new(graphics.shader_manager.get_shader("particle").clone()),
+            graphics.texture_manager.get_texture("particle").clone(),
+            500,
         );
-
-        let particle_texture = graphics.texture_manager.load_texture(
-            Path::new("resources/textures/particle.png"),
-            true,
-            "particle",
-        );
-
-        let mut particle_generator =
-            ParticleGenerator::new(particle_shader, particle_texture.clone(), 500);
         particle_generator.init();
 
-        let post_processor_shader = graphics.shader_manager.load_shader(
-            Path::new("shaders/post_processing.vs"),
-            Path::new("shaders/post_processing.frag"),
-            None,
-            "postprocessing".to_string(),
-        );
-
         let effects = PostProcessor::new(
-            post_processor_shader,
+            Rc::new(graphics.shader_manager.get_shader("postprocessing").clone()),
             graphics.width as i32,
             graphics.height as i32,
         );
@@ -95,25 +92,18 @@ impl Game {
             state: GameState::Active,
             keys: [false; 1024],
             graphics,
-            levels: vec![],
+            levels,
             level: 0,
             player,
             ball,
             particle_generator,
             effects,
             shake_time: 0.0,
+            powerups: vec![],
         }
     }
 
     pub fn init(&mut self) {
-        // load shaders
-        let _shader = self.graphics.shader_manager.load_shader(
-            Path::new("shaders/sprite.vs"),
-            Path::new("shaders/sprite.frag"),
-            None,
-            "sprite".to_string(),
-        );
-
         // configure shaders
         let projection = glm::ortho(
             0.0,
@@ -144,68 +134,6 @@ impl Game {
             .shader_manager
             .get_shader("particle")
             .set_mat4("projection\0", &projection);
-
-        // load textures
-        self.graphics.texture_manager.load_texture(
-            Path::new("resources/textures/background.jpg"),
-            false,
-            "background",
-        );
-
-        self.graphics.texture_manager.load_texture(
-            Path::new("resources/textures/awesomeface.png"),
-            true,
-            "ball",
-        );
-
-        self.graphics.texture_manager.load_texture(
-            Path::new("resources/textures/block.png"),
-            false,
-            "block",
-        );
-
-        self.graphics.texture_manager.load_texture(
-            Path::new("resources/textures/block_solid.png"),
-            false,
-            "block_solid",
-        );
-
-        self.graphics.texture_manager.load_texture(
-            Path::new("resources/textures/paddle.png"),
-            true,
-            "paddle",
-        );
-
-        // load levels
-        let mut one = GameLevel { bricks: vec![] };
-        one.load(
-            Path::new("resources/levels/one.lvl"),
-            self.graphics.width,
-            self.graphics.height / 2,
-            &self.graphics.texture_manager,
-        );
-        self.levels.push(one);
-        let mut two = GameLevel { bricks: vec![] };
-        two.load(
-            Path::new("resources/levels/two.lvl"),
-            self.graphics.width,
-            self.graphics.height / 2,
-            &self.graphics.texture_manager,
-        );
-        let mut three = GameLevel { bricks: vec![] };
-        three.load(
-            Path::new("resources/levels/three.lvl"),
-            self.graphics.width,
-            self.graphics.height / 2,
-            &self.graphics.texture_manager,
-        );
-        let mut four = GameLevel { bricks: vec![] };
-        four.load(
-            Path::new("resources/levels/four.lvl"),
-            self.graphics.width,
-            self.graphics.height / 2,
-            &self.graphics.texture_manager,
-        );
     }
 
     pub fn process_input(&mut self, dt: f64) {
@@ -337,6 +265,14 @@ impl Game {
         );
     }
 
+    fn spawn_powerups(&self, block: &GameObject) {
+        unimplemented!()
+    }
+
+    fn update_powerups(&self, dt: f32) {
+        unimplemented!()
+    }
+
     fn do_collisions(&mut self) {
         for brick in &mut self.levels[self.level as usize].bricks {
             if !brick.destroyed {
@@ -395,6 +331,90 @@ impl Game {
             self.ball.object.velocity.y = -1.0 * self.ball.object.velocity.y.abs();
         }
     }
+}
+
+fn load_shaders(shader_manager: &mut ShaderManager) {
+    shader_manager.load_shader(
+        Path::new("shaders/particle.vs"),
+        Path::new("shaders/particle.frag"),
+        None,
+        "particle".to_string(),
+    );
+
+    shader_manager.load_shader(
+        Path::new("shaders/post_processing.vs"),
+        Path::new("shaders/post_processing.frag"),
+        None,
+        "postprocessing".to_string(),
+    );
+}
+
+fn load_textures(texture_manager: &mut TextureManager) {
+    texture_manager.load_texture(
+        Path::new("resources/textures/background.jpg"),
+        false,
+        "background",
+    );
+
+    texture_manager.load_texture(
+        Path::new("resources/textures/awesomeface.png"),
+        true,
+        "ball",
+    );
+
+    texture_manager.load_texture(Path::new("resources/textures/block.png"), false, "block");
+
+    texture_manager.load_texture(
+        Path::new("resources/textures/block_solid.png"),
+        false,
+        "block_solid",
+    );
+
+    texture_manager.load_texture(Path::new("resources/textures/paddle.png"), true, "paddle");
+
+    texture_manager.load_texture(
+        Path::new("resources/textures/particle.png"),
+        true,
+        "particle",
+    );
+}
+
+fn load_levels(
+    levels: &mut Vec<GameLevel>,
+    width: u32,
+    height: u32,
+    texture_manager: &TextureManager,
+) {
+    // load levels
+    let mut one = GameLevel { bricks: vec![] };
+    one.load(
+        Path::new("resources/levels/one.lvl"),
+        width,
+        height / 2,
+        texture_manager,
+    );
+    levels.push(one);
+    let mut two = GameLevel { bricks: vec![] };
+    two.load(
+        Path::new("resources/levels/two.lvl"),
+        width,
+        height / 2,
+        texture_manager,
+    );
+    let mut three = GameLevel { bricks: vec![] };
+    three.load(
+        Path::new("resources/levels/three.lvl"),
+        width,
+        height / 2,
+        texture_manager,
+    );
+    let mut four = GameLevel { bricks: vec![] };
+    four.load(
+        Path::new("resources/levels/four.lvl"),
+        width,
+        height / 2,
+        texture_manager,
+    );
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
