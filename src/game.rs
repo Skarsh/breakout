@@ -5,7 +5,10 @@ use std::{ops::Neg, path::Path};
 use glfw::ffi::glfwGetTime;
 use kira::{
     manager::{backend::DefaultBackend, AudioManager, AudioManagerSettings},
-    sound::static_sound::{StaticSoundData, StaticSoundSettings},
+    sound::{
+        static_sound::{StaticSoundData, StaticSoundSettings},
+        SoundData,
+    },
 };
 use nalgebra_glm as glm;
 use rand::random;
@@ -454,9 +457,29 @@ impl Game {
                     if !brick.is_solid {
                         brick.destroyed = true;
                         Self::spawn_powerups(&mut self.powerups, brick);
+                        // TODO: Sound should have been preloaded and just played here.
+                        self.audio_manager
+                            .play(
+                                StaticSoundData::from_file(
+                                    "resources/audio/bleep.mp3",
+                                    StaticSoundSettings::default(),
+                                )
+                                .unwrap(),
+                            )
+                            .unwrap();
                     } else {
                         self.shake_time = 0.05;
                         self.effects.shake = true;
+                        // TODO: Sound should have been preloaded and just played.
+                        self.audio_manager
+                            .play(
+                                StaticSoundData::from_file(
+                                    "resources/audio/solid.wav",
+                                    StaticSoundSettings::default(),
+                                )
+                                .unwrap(),
+                            )
+                            .unwrap();
                     }
 
                     let dir = collision.1;
@@ -516,6 +539,16 @@ impl Game {
                     );
                     powerup.object.destroyed = true;
                     powerup.activated = true;
+                    // TODO: Sound should have been preloaded and just played.
+                    self.audio_manager
+                        .play(
+                            StaticSoundData::from_file(
+                                "resources/audio/powerup.wav",
+                                StaticSoundSettings::default(),
+                            )
+                            .unwrap(),
+                        )
+                        .unwrap();
                 }
             }
         }
