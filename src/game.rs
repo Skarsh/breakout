@@ -3,6 +3,10 @@
 use std::{ops::Neg, path::Path};
 
 use glfw::ffi::glfwGetTime;
+use kira::{
+    manager::{backend::DefaultBackend, AudioManager, AudioManagerSettings},
+    sound::static_sound::{StaticSoundData, StaticSoundSettings},
+};
 use nalgebra_glm as glm;
 use rand::random;
 
@@ -26,7 +30,6 @@ enum GameState {
 pub const PLAYER_SIZE: glm::Vec2 = glm::Vec2::new(100.0, 20.0);
 pub const PLAYER_VELOCITY: f32 = 500.0;
 
-#[derive(Debug)]
 pub struct Game {
     state: GameState,
     pub keys: [bool; 1024],
@@ -39,6 +42,7 @@ pub struct Game {
     effects: PostProcessor,
     shake_time: f32,
     powerups: Vec<PowerUp>,
+    audio_manager: AudioManager,
 }
 
 impl Game {
@@ -101,6 +105,8 @@ impl Game {
             effects,
             shake_time: 0.0,
             powerups: vec![],
+            audio_manager: AudioManager::<DefaultBackend>::new(AudioManagerSettings::default())
+                .unwrap(),
         }
     }
 
@@ -135,6 +141,13 @@ impl Game {
             .shader_manager
             .get_shader("particle")
             .set_mat4("projection\0", &projection);
+
+        let sound_data = StaticSoundData::from_file(
+            "resources/audio/lady_of_the_80s.mp3",
+            StaticSoundSettings::new().loop_region(..),
+        )
+        .unwrap();
+        self.audio_manager.play(sound_data).unwrap();
     }
 
     pub fn process_input(&mut self, dt: f64) {
