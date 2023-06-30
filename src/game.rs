@@ -4,6 +4,7 @@ use std::{ops::Neg, path::Path};
 
 use glfw::ffi::glfwGetTime;
 use nalgebra_glm as glm;
+use rand::random;
 
 use crate::{
     ball::{Ball, BALL_RADIUS, INITIAL_BALL_VELOCITY},
@@ -12,7 +13,7 @@ use crate::{
     graphics::{post_processor::PostProcessor, shader_manager::ShaderManager},
     graphics::{texture_manager::TextureManager, Graphics},
     particle_generator::ParticleGenerator,
-    powerup::PowerUp,
+    powerup::{PowerUp, PowerUpType},
 };
 
 #[derive(Debug)]
@@ -265,14 +266,95 @@ impl Game {
         );
     }
 
-    fn spawn_powerups(&self, block: &GameObject) {
-        unimplemented!()
+    fn spawn_powerups(&mut self, block: &GameObject) {
+        // 1 in 75 chance
+        if should_spawn(75) {
+            self.powerups.push(PowerUp::new(
+                PowerUpType::Speed,
+                glm::vec3(0.5, 0.5, 1.0),
+                0.0,
+                block.position,
+                "powerup_speed".to_string(),
+            ));
+        }
+        if should_spawn(75) {
+            self.powerups.push(PowerUp::new(
+                PowerUpType::Sticky,
+                glm::vec3(1.0, 0.5, 1.0),
+                20.0,
+                block.position,
+                "powerup_sticky".to_string(),
+            ));
+        }
+        if should_spawn(75) {
+            self.powerups.push(PowerUp::new(
+                PowerUpType::PassThrough,
+                glm::vec3(0.5, 1.0, 0.5),
+                10.0,
+                block.position,
+                "powerup_passthrough".to_string(),
+            ));
+        }
+        if should_spawn(75) {
+            self.powerups.push(PowerUp::new(
+                PowerUpType::PadSizeIncrease,
+                glm::vec3(1.0, 0.6, 0.0),
+                0.0,
+                block.position,
+                "powerup_increase".to_string(),
+            ));
+        }
+        if should_spawn(15) {
+            self.powerups.push(PowerUp::new(
+                PowerUpType::Confuse,
+                glm::vec3(1.0, 0.3, 0.3),
+                15.0,
+                block.position,
+                "powerup_confuse".to_string(),
+            ));
+        }
+        if should_spawn(15) {
+            self.powerups.push(PowerUp::new(
+                PowerUpType::Chaos,
+                glm::vec3(0.9, 0.25, 0.25),
+                15.0,
+                block.position,
+                "powerup_chaos".to_string(),
+            ));
+        }
     }
 
     fn update_powerups(&self, dt: f32) {
         unimplemented!()
     }
 
+    fn activate_powerup(&mut self, powerup: &PowerUp) {
+        match powerup.r#type {
+            PowerUpType::Speed => self.ball.object.velocity *= 1.2,
+            PowerUpType::Sticky => {
+                self.ball.sticky = true;
+                self.player.color = glm::vec3(1.0, 0.5, 1.0);
+            }
+            PowerUpType::PassThrough => {
+                self.ball.passthrough = true;
+                self.ball.object.color = glm::vec3(1.0, 0.5, 0.5);
+            }
+            PowerUpType::PadSizeIncrease => {
+                self.player.size.x += 50.0;
+                self.player.size.y += 50.0;
+            }
+            PowerUpType::Confuse => {
+                if !self.effects.chaos {
+                    self.effects.confuse = true;
+                }
+            }
+            PowerUpType::Chaos => {
+                if !self.effects.confuse {
+                    self.effects.chaos = true;
+                }
+            }
+        }
+    }
     fn do_collisions(&mut self) {
         for brick in &mut self.levels[self.level as usize].bricks {
             if !brick.destroyed {
@@ -481,4 +563,9 @@ fn vector_direction(target: glm::Vec2) -> Direction {
     }
 
     best_match
+}
+
+fn should_spawn(chance: u32) -> bool {
+    let random = random::<u32>() % chance;
+    random == 0
 }

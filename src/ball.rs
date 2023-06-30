@@ -13,6 +13,8 @@ pub struct Ball {
     // ball state
     pub radius: f32,
     pub stuck: bool,
+    pub sticky: bool,
+    pub passthrough: bool,
 }
 
 impl Ball {
@@ -31,6 +33,8 @@ impl Ball {
 
             radius,
             stuck,
+            sticky: false,
+            passthrough: false,
         }
     }
 
