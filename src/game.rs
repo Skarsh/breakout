@@ -371,27 +371,37 @@ impl Game {
                     let dir = collision.1;
                     let diff_vector = collision.2;
 
-                    // Horizontal collision
-                    if dir == Direction::Left || dir == Direction::Right {
-                        self.ball.object.velocity.x *= -1.0;
+                    // collision resolution
+                    if !(self.ball.passthrough && !brick.is_solid) {
+                        // horizontal collision
+                        if dir == Direction::Left || dir == Direction::Right {
+                            // reverse horizontal velocity
+                            self.ball.object.velocity.x = -self.ball.object.velocity.x;
 
-                        // relocate
-                        let penetration = self.ball.radius - diff_vector.x.abs();
-                        if dir == Direction::Left {
-                            // move ball to the right
-                            self.ball.position().x += penetration;
+                            // relocate
+                            let penetration = self.ball.radius - diff_vector.x.abs();
+                            if dir == Direction::Left {
+                                // move ball to the right
+                                self.ball.object.position.x += penetration;
+                            } else {
+                                // move ball to the left
+                                self.ball.object.position.x -= penetration;
+                            }
                         } else {
-                            self.ball.position().x -= penetration;
-                        }
-                    } else {
-                        // vertical collision
-                        self.ball.object.velocity.y *= -1.0;
-                        let penetration = self.ball.radius - diff_vector.y.abs();
-                        if dir == Direction::Up {
-                            // move ball back up
-                            self.ball.position().y -= penetration;
-                        } else {
-                            self.ball.position().y += penetration;
+                            // vertical collision
+
+                            // reverse vertical velocity
+                            self.ball.object.velocity.y = -self.ball.object.velocity.y;
+
+                            // relocate
+                            let penetration = self.ball.radius - diff_vector.y.abs();
+                            if dir == Direction::Up {
+                                // move ball back up
+                                self.ball.object.position.y -= penetration;
+                            } else {
+                                // move ball back down
+                                self.ball.object.position.y += penetration;
+                            }
                         }
                     }
                 }
@@ -411,6 +421,9 @@ impl Game {
             self.ball.object.velocity =
                 glm::normalize(&self.ball.object.velocity) * glm::length(&old_velocity);
             self.ball.object.velocity.y = -1.0 * self.ball.object.velocity.y.abs();
+
+            // if Sticky powerup is activated, also stick ball to paddle once new velocity vectors were calculated
+            self.ball.stuck = self.ball.sticky;
         }
     }
 }
