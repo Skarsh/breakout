@@ -381,15 +381,11 @@ impl Game {
             }
         }
 
-        // TODO: Should be possible to improve this
-        let mut indexes_to_erase = vec![];
-        for i in 0..self.powerups.len() {
-            if self.powerups[i].object.destroyed && !self.powerups[i].activated {
-                indexes_to_erase.push(i);
-            }
-        }
-        for i in 0..indexes_to_erase.len() {
-            self.powerups.remove(i);
+        for _ in 0..self.powerups.len() {
+            self.powerups.retain(|powerup| {
+                let delete = powerup.object.destroyed && !powerup.activated;
+                !delete
+            })
         }
     }
 
