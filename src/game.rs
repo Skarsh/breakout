@@ -328,33 +328,39 @@ impl Game {
         unimplemented!()
     }
 
-    fn activate_powerup(&mut self, powerup: &PowerUp) {
+    fn activate_powerup(
+        ball: &mut Ball,
+        player: &mut GameObject,
+        powerup: &PowerUp,
+        effects: &mut PostProcessor,
+    ) {
         match powerup.r#type {
-            PowerUpType::Speed => self.ball.object.velocity *= 1.2,
+            PowerUpType::Speed => ball.object.velocity *= 1.2,
             PowerUpType::Sticky => {
-                self.ball.sticky = true;
-                self.player.color = glm::vec3(1.0, 0.5, 1.0);
+                ball.sticky = true;
+                player.color = glm::vec3(1.0, 0.5, 1.0);
             }
             PowerUpType::PassThrough => {
-                self.ball.passthrough = true;
-                self.ball.object.color = glm::vec3(1.0, 0.5, 0.5);
+                ball.passthrough = true;
+                ball.object.color = glm::vec3(1.0, 0.5, 0.5);
             }
             PowerUpType::PadSizeIncrease => {
-                self.player.size.x += 50.0;
-                self.player.size.y += 50.0;
+                player.size.x += 50.0;
+                player.size.y += 50.0;
             }
             PowerUpType::Confuse => {
-                if !self.effects.chaos {
-                    self.effects.confuse = true;
+                if !effects.chaos {
+                    effects.confuse = true;
                 }
             }
             PowerUpType::Chaos => {
-                if !self.effects.confuse {
-                    self.effects.chaos = true;
+                if !effects.confuse {
+                    effects.chaos = true;
                 }
             }
         }
     }
+
     fn do_collisions(&mut self) {
         for brick in &mut self.levels[self.level as usize].bricks {
             if !brick.destroyed {
@@ -407,6 +413,28 @@ impl Game {
                 }
             }
         }
+
+        // also check collisions on PowerUps and if so, activate them
+        for powerup in &mut self.powerups {
+            if !powerup.object.destroyed {
+                // first check if powerup passed bottom edge, if so: keep as inactive and destroy
+                if powerup.object.position.y >= self.graphics.height as f32 {
+                    powerup.object.destroyed = true;
+                }
+
+                if check_collision_box(&self.player, &powerup.object) {
+                    Self::activate_powerup(
+                        &mut self.ball,
+                        &mut self.player,
+                        &powerup,
+                        &mut self.effects,
+                    );
+                    powerup.object.destroyed = true;
+                    powerup.activated = true;
+                }
+            }
+        }
+
         let result = check_collision_circle(&self.ball, &self.player);
         if !self.ball.stuck && result.0 {
             // check where it hit the board, and change directin accordingly
@@ -522,6 +550,15 @@ enum Direction {
 }
 
 struct Collision(bool, Direction, glm::Vec2);
+
+fn check_collision_box(one: &GameObject, two: &GameObject) -> bool {
+    // collision x-axis?
+    let collision_x = one.position.x + one.size.x >= two.position.x
+        && two.position.x + two.size.x >= one.position.x;
+    let collision_y = one.position.y + one.size.y >= two.position.y
+        && two.position.y + two.size.y >= one.position.y;
+    collision_x && collision_y
+}
 
 fn check_collision_circle(one: &Ball, two: &GameObject) -> Collision {
     let center = glm::vec2(one.position().x + one.radius, one.position().y + one.radius);

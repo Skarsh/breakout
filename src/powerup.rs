@@ -17,10 +17,10 @@ pub enum PowerUpType {
 
 #[derive(Debug, Clone)]
 pub struct PowerUp {
-    object: GameObject,
+    pub object: GameObject,
     pub r#type: PowerUpType,
     duration: f32,
-    activated: bool,
+    pub activated: bool,
 }
 
 impl PowerUp {
