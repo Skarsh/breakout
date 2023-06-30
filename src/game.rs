@@ -444,7 +444,7 @@ impl Game {
                 if collision.0 {
                     if !brick.is_solid {
                         brick.destroyed = true;
-                        Self::spawn_powerups(&mut self.powerups, &brick);
+                        Self::spawn_powerups(&mut self.powerups, brick);
                     } else {
                         self.shake_time = 0.05;
                         self.effects.shake = true;
@@ -502,7 +502,7 @@ impl Game {
                     Self::activate_powerup(
                         &mut self.ball,
                         &mut self.player,
-                        &powerup,
+                        powerup,
                         &mut self.effects,
                     );
                     powerup.object.destroyed = true;
