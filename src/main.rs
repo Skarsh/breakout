@@ -23,6 +23,7 @@ mod game_object;
 mod game_level;
 
 mod particle_generator;
+mod powerup;
 
 // settings
 const SCR_WIDTH: u32 = 800;
