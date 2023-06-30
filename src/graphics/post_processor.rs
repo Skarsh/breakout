@@ -10,7 +10,7 @@ use super::{shader::Shader, texture::Texture2D};
 
 #[derive(Debug)]
 pub struct PostProcessor {
-    post_processing_shader: Rc<Shader>,
+    post_processing_shader: Shader,
     texture: Texture2D,
     width: i32,
     height: i32,
@@ -24,7 +24,7 @@ pub struct PostProcessor {
 }
 
 impl PostProcessor {
-    pub fn new(shader: Rc<Shader>, width: i32, height: i32) -> Self {
+    pub fn new(shader: Shader, width: i32, height: i32) -> Self {
         let mut msfbo = 0;
         let mut fbo = 0;
         let mut rbo = 0;

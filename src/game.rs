@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::{ops::Neg, path::Path, rc::Rc};
+use std::{ops::Neg, path::Path};
 
 use glfw::ffi::glfwGetTime;
 use nalgebra_glm as glm;
@@ -76,14 +76,14 @@ impl Game {
         let ball = Ball::new(ball_pos, BALL_RADIUS, true);
 
         let mut particle_generator = ParticleGenerator::new(
-            Rc::new(graphics.shader_manager.get_shader("particle").clone()),
+            graphics.shader_manager.get_shader("particle").clone(),
             graphics.texture_manager.get_texture("particle").clone(),
             500,
         );
         particle_generator.init();
 
         let effects = PostProcessor::new(
-            Rc::new(graphics.shader_manager.get_shader("postprocessing").clone()),
+            graphics.shader_manager.get_shader("postprocessing").clone(),
             graphics.width as i32,
             graphics.height as i32,
         );

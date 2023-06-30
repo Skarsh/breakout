@@ -34,7 +34,7 @@ impl Particle {
 pub struct ParticleGenerator {
     particles: Vec<Particle>,
     amount: u32,
-    shader: Rc<Shader>,
+    shader: Shader,
     texture: Texture2D,
     vao: u32,
     last_used_particle: usize,
@@ -42,7 +42,7 @@ pub struct ParticleGenerator {
 }
 
 impl ParticleGenerator {
-    pub fn new(shader: Rc<Shader>, texture: Texture2D, amount: u32) -> Self {
+    pub fn new(shader: Shader, texture: Texture2D, amount: u32) -> Self {
         Self {
             particles: Vec::new(),
             amount,
