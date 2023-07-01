@@ -13,7 +13,7 @@ struct Character {
     advance: u32,
 }
 
-struct TextRenderer {
+pub struct TextRenderer {
     characters: HashMap<u8, Character>,
     text_shader: Shader,
     vao: u32,
@@ -113,7 +113,7 @@ impl TextRenderer {
         }
     }
 
-    pub fn render_text(&mut self, text: String, mut x: f32, y: f32, scale: f32, color: glm::Vec3) {
+    pub fn render_text(&mut self, text: &str, mut x: f32, y: f32, scale: f32, color: glm::Vec3) {
         // activate corresponding render state
         self.text_shader.use_program();
         self.text_shader.set_vec3("textColor\0", &color);
