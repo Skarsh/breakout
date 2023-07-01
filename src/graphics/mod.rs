@@ -3,6 +3,7 @@ pub mod post_processor;
 pub mod shader;
 pub mod shader_manager;
 pub mod sprite_renderer;
+pub mod text_renderer;
 pub mod texture;
 pub mod texture_manager;
 
