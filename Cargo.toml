@@ -11,6 +11,11 @@ nalgebra-glm = "0.18.0"
 image = "0.24.5"
 rand = "0.8.5"
 kira = "0.8.4"
+freetype-rs = "0.32.0"
 
 [dependencies.glfw]
 version = "0.51.0"
+
+[target.x86_64-pc-windows-msvc.freetype]
+rustc-link-search = ["libs\\freetype\freetype.lib"]
+rustc-link-lib = ["freetype"]
