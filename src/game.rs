@@ -5,10 +5,7 @@ use std::{ops::Neg, path::Path};
 use glfw::ffi::glfwGetTime;
 use kira::{
     manager::{backend::DefaultBackend, AudioManager, AudioManagerSettings},
-    sound::{
-        static_sound::{StaticSoundData, StaticSoundSettings},
-        SoundData,
-    },
+    sound::static_sound::{StaticSoundData, StaticSoundSettings},
 };
 use nalgebra_glm as glm;
 use rand::random;
@@ -17,7 +14,9 @@ use crate::{
     ball::{Ball, BALL_RADIUS, INITIAL_BALL_VELOCITY},
     game_level::GameLevel,
     game_object::GameObject,
-    graphics::{post_processor::PostProcessor, shader_manager::ShaderManager},
+    graphics::{
+        post_processor::PostProcessor, shader_manager::ShaderManager, text_renderer::TextRenderer,
+    },
     graphics::{texture_manager::TextureManager, Graphics},
     particle_generator::ParticleGenerator,
     powerup::{PowerUp, PowerUpType},
@@ -46,6 +45,7 @@ pub struct Game {
     shake_time: f32,
     powerups: Vec<PowerUp>,
     audio_manager: AudioManager,
+    text_renderer: TextRenderer,
 }
 
 impl Game {
@@ -96,6 +96,13 @@ impl Game {
             graphics.height as i32,
         );
 
+        let mut text_renderer = TextRenderer::new(
+            graphics.width,
+            graphics.height,
+            graphics.shader_manager.get_shader("text").clone(),
+        );
+        text_renderer.load("resources/fonts/ocraext.TTF".to_string(), 24);
+
         Self {
             state: GameState::Active,
             keys: [false; 1024],
@@ -110,6 +117,7 @@ impl Game {
             powerups: vec![],
             audio_manager: AudioManager::<DefaultBackend>::new(AudioManagerSettings::default())
                 .unwrap(),
+            text_renderer,
         }
     }
 
@@ -147,7 +155,8 @@ impl Game {
 
         let sound_data = StaticSoundData::from_file(
             "resources/audio/lady_of_the_80s.mp3",
-            StaticSoundSettings::new().loop_region(..),
+            //StaticSoundSettings::new().loop_region(..),
+            StaticSoundSettings::new().volume(0.1),
         )
         .unwrap();
         self.audio_manager.play(sound_data).unwrap();
@@ -241,6 +250,8 @@ impl Game {
                 unsafe {
                     self.effects.render(glfwGetTime() as f32);
                 }
+                self.text_renderer
+                    .render_text("hello", 5.0, 5.0, 1.0, glm::vec3(1.0, 1.0, 1.0));
             }
             _ => panic!("Illegal state"),
         }
@@ -587,6 +598,13 @@ fn load_shaders(shader_manager: &mut ShaderManager) {
         Path::new("shaders/post_processing.frag"),
         None,
         "postprocessing".to_string(),
+    );
+
+    shader_manager.load_shader(
+        Path::new("shaders/text_2d.vs"),
+        Path::new("shaders/text_2d.frag"),
+        None,
+        "text".to_string(),
     );
 }
 
