@@ -265,7 +265,39 @@ impl Game {
 
     pub fn render(&mut self) {
         match self.state {
-            GameState::Active => {
+            GameState::Menu => {
+                self.text_renderer.render_text(
+                    "Press ENTER to start",
+                    250.0,
+                    self.graphics.height as f32 / 2.0,
+                    1.0,
+                    glm::vec3(1.0, 1.0, 1.0),
+                );
+                self.text_renderer.render_text(
+                    "Press W or S to select level",
+                    245.0,
+                    self.graphics.height as f32 / 2.0 + 20.0,
+                    0.75,
+                    glm::vec3(1.0, 1.0, 1.0),
+                );
+            }
+            GameState::Win => {
+                self.text_renderer.render_text(
+                    "YOU WON!!!",
+                    320.0,
+                    self.graphics.height as f32 / 2.0 - 20.0,
+                    1.0,
+                    glm::vec3(1.0, 1.0, 1.0),
+                );
+                self.text_renderer.render_text(
+                    "Press ENTER to retry or ESC to quit",
+                    130.0,
+                    self.graphics.height as f32 / 2.0,
+                    1.0,
+                    glm::vec3(1.0, 1.0, 1.0),
+                );
+            }
+            _ => {
                 self.effects.begin_render();
                 self.graphics.render();
                 if let Some(level) = self.levels.get_mut(self.level as usize) {
@@ -301,38 +333,6 @@ impl Game {
                     &format!("Lives: {}", self.lives),
                     5.0,
                     5.0,
-                    1.0,
-                    glm::vec3(1.0, 1.0, 1.0),
-                );
-            }
-            GameState::Menu => {
-                self.text_renderer.render_text(
-                    "Press ENTER to start",
-                    250.0,
-                    self.graphics.height as f32 / 2.0,
-                    1.0,
-                    glm::vec3(1.0, 1.0, 1.0),
-                );
-                self.text_renderer.render_text(
-                    "Press W or S to select level",
-                    245.0,
-                    self.graphics.height as f32 / 2.0 + 20.0,
-                    0.75,
-                    glm::vec3(1.0, 1.0, 1.0),
-                );
-            }
-            GameState::Win => {
-                self.text_renderer.render_text(
-                    "YOU WON!!!",
-                    320.0,
-                    self.graphics.height as f32 / 2.0 - 20.0,
-                    1.0,
-                    glm::vec3(1.0, 1.0, 1.0),
-                );
-                self.text_renderer.render_text(
-                    "Press ENTER to retry or ESC to quit",
-                    130.0,
-                    self.graphics.height as f32 / 2.0,
                     1.0,
                     glm::vec3(1.0, 1.0, 1.0),
                 );
