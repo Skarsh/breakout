@@ -185,8 +185,8 @@ impl Game {
                         self.level -= 1;
                     } else {
                         self.level = 3;
-                        self.keys_processed[glfw::Key::S as usize] = true;
                     }
+                    self.keys_processed[glfw::Key::S as usize] = true;
                 }
             }
             GameState::Win => {
@@ -779,6 +779,7 @@ fn load_levels(
         height / 2,
         texture_manager,
     );
+    levels.push(two);
     let mut three = GameLevel { bricks: vec![] };
     three.load(
         Path::new("resources/levels/three.lvl"),
@@ -786,6 +787,7 @@ fn load_levels(
         height / 2,
         texture_manager,
     );
+    levels.push(three);
     let mut four = GameLevel { bricks: vec![] };
     four.load(
         Path::new("resources/levels/four.lvl"),
@@ -793,6 +795,7 @@ fn load_levels(
         height / 2,
         texture_manager,
     );
+    levels.push(four);
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
