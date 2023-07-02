@@ -107,7 +107,7 @@ impl Game {
         text_renderer.load("resources/fonts/ocraext.TTF".to_string(), 24);
 
         Self {
-            state: GameState::Active,
+            state: GameState::Menu,
             keys: [false; 1024],
             keys_processed: [false; 1024],
             graphics,
@@ -264,79 +264,80 @@ impl Game {
     }
 
     pub fn render(&mut self) {
-        match self.state {
-            GameState::Menu => {
-                self.text_renderer.render_text(
-                    "Press ENTER to start",
-                    250.0,
-                    self.graphics.height as f32 / 2.0,
-                    1.0,
-                    glm::vec3(1.0, 1.0, 1.0),
-                );
-                self.text_renderer.render_text(
-                    "Press W or S to select level",
-                    245.0,
-                    self.graphics.height as f32 / 2.0 + 20.0,
-                    0.75,
-                    glm::vec3(1.0, 1.0, 1.0),
+        if self.state == GameState::Active
+            || self.state == GameState::Menu
+            || self.state == GameState::Win
+        {
+            self.effects.begin_render();
+            self.graphics.render();
+            if let Some(level) = self.levels.get_mut(self.level as usize) {
+                level.draw(
+                    &mut self.graphics.sprite_renderer,
+                    &self.graphics.texture_manager,
                 );
             }
-            GameState::Win => {
-                self.text_renderer.render_text(
-                    "YOU WON!!!",
-                    320.0,
-                    self.graphics.height as f32 / 2.0 - 20.0,
-                    1.0,
-                    glm::vec3(1.0, 1.0, 1.0),
-                );
-                self.text_renderer.render_text(
-                    "Press ENTER to retry or ESC to quit",
-                    130.0,
-                    self.graphics.height as f32 / 2.0,
-                    1.0,
-                    glm::vec3(1.0, 1.0, 1.0),
-                );
-            }
-            _ => {
-                self.effects.begin_render();
-                self.graphics.render();
-                if let Some(level) = self.levels.get_mut(self.level as usize) {
-                    level.draw(
+            self.player.draw(
+                &mut self.graphics.sprite_renderer,
+                self.graphics.texture_manager.get_texture("paddle"),
+            );
+            for powerup in &self.powerups {
+                if !powerup.object.destroyed {
+                    powerup.object.draw(
                         &mut self.graphics.sprite_renderer,
-                        &self.graphics.texture_manager,
+                        self.graphics
+                            .texture_manager
+                            .get_texture(&powerup.object.sprite_id),
                     );
                 }
-                self.player.draw(
-                    &mut self.graphics.sprite_renderer,
-                    self.graphics.texture_manager.get_texture("paddle"),
-                );
-                for powerup in &self.powerups {
-                    if !powerup.object.destroyed {
-                        powerup.object.draw(
-                            &mut self.graphics.sprite_renderer,
-                            self.graphics
-                                .texture_manager
-                                .get_texture(&powerup.object.sprite_id),
-                        );
-                    }
-                }
-                self.particle_generator.draw();
-                self.ball.draw(
-                    &mut self.graphics.sprite_renderer,
-                    self.graphics.texture_manager.get_texture("ball"),
-                );
-                self.effects.end_render();
-                unsafe {
-                    self.effects.render(glfwGetTime() as f32);
-                }
-                self.text_renderer.render_text(
-                    &format!("Lives: {}", self.lives),
-                    5.0,
-                    5.0,
-                    1.0,
-                    glm::vec3(1.0, 1.0, 1.0),
-                );
             }
+            self.particle_generator.draw();
+            self.ball.draw(
+                &mut self.graphics.sprite_renderer,
+                self.graphics.texture_manager.get_texture("ball"),
+            );
+            self.effects.end_render();
+            unsafe {
+                self.effects.render(glfwGetTime() as f32);
+            }
+            self.text_renderer.render_text(
+                &format!("Lives: {}", self.lives),
+                5.0,
+                5.0,
+                1.0,
+                glm::vec3(1.0, 1.0, 1.0),
+            );
+        }
+        if self.state == GameState::Menu {
+            self.text_renderer.render_text(
+                "Press ENTER to start",
+                250.0,
+                self.graphics.height as f32 / 2.0,
+                1.0,
+                glm::vec3(1.0, 1.0, 1.0),
+            );
+            self.text_renderer.render_text(
+                "Press W or S to select level",
+                245.0,
+                self.graphics.height as f32 / 2.0 + 20.0,
+                0.75,
+                glm::vec3(1.0, 1.0, 1.0),
+            );
+        }
+        if self.state == GameState::Win {
+            self.text_renderer.render_text(
+                "YOU WON!!!",
+                320.0,
+                self.graphics.height as f32 / 2.0 - 20.0,
+                1.0,
+                glm::vec3(1.0, 1.0, 1.0),
+            );
+            self.text_renderer.render_text(
+                "Press ENTER to retry or ESC to quit",
+                130.0,
+                self.graphics.height as f32 / 2.0,
+                1.0,
+                glm::vec3(1.0, 1.0, 1.0),
+            );
         }
     }
 
