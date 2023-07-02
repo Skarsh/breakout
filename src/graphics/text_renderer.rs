@@ -25,10 +25,11 @@ impl TextRenderer {
         let mut vao = 0;
         let mut vbo = 0;
 
+        text_shader.use_program();
         // TODO: No clue whether the near and far values here makes sense
         text_shader.set_mat4(
             "projection\0",
-            &glm::ortho(0.0, width as f32, height as f32, 0.0, 1.0, 10.0),
+            &glm::ortho(0.0, width as f32, height as f32, 0.0, 0.0, 1.0),
         );
         text_shader.set_int("text\0", 0);
 
