@@ -418,10 +418,8 @@ impl Game {
 
     fn is_other_powerup_active(powerups: &Vec<PowerUp>, r#type: &PowerUpType) -> bool {
         for powerup in powerups {
-            if powerup.activated {
-                if &powerup.r#type == r#type {
-                    return true;
-                }
+            if powerup.activated && &powerup.r#type == r#type {
+                return true;
             }
         }
         false
@@ -497,7 +495,7 @@ impl Game {
                     let diff_vector = collision.2;
 
                     // collision resolution
-                    if !(self.ball.passthrough && !brick.is_solid) {
+                    if !self.ball.passthrough || brick.is_solid {
                         // horizontal collision
                         if dir == Direction::Left || dir == Direction::Right {
                             // reverse horizontal velocity
