@@ -270,10 +270,46 @@ impl Game {
                 unsafe {
                     self.effects.render(glfwGetTime() as f32);
                 }
-                self.text_renderer
-                    .render_text("hello", 5.0, 5.0, 1.0, glm::vec3(1.0, 1.0, 1.0));
+                self.text_renderer.render_text(
+                    &format!("Lives: {}", self.lives),
+                    5.0,
+                    5.0,
+                    1.0,
+                    glm::vec3(1.0, 1.0, 1.0),
+                );
             }
-            _ => panic!("Illegal state"),
+            GameState::Menu => {
+                self.text_renderer.render_text(
+                    "Press ENTER to start",
+                    250.0,
+                    self.graphics.height as f32 / 2.0,
+                    1.0,
+                    glm::vec3(1.0, 1.0, 1.0),
+                );
+                self.text_renderer.render_text(
+                    "Press W or S to select level",
+                    245.0,
+                    self.graphics.height as f32 / 2.0 + 20.0,
+                    0.75,
+                    glm::vec3(1.0, 1.0, 1.0),
+                );
+            }
+            GameState::Win => {
+                self.text_renderer.render_text(
+                    "YOU WON!!!",
+                    320.0,
+                    self.graphics.height as f32 / 2.0 - 20.0,
+                    1.0,
+                    glm::vec3(1.0, 1.0, 1.0),
+                );
+                self.text_renderer.render_text(
+                    "Press ENTER to retry or ESC to quit",
+                    130.0,
+                    self.graphics.height as f32 / 2.0,
+                    1.0,
+                    glm::vec3(1.0, 1.0, 1.0),
+                );
+            }
         }
     }
 
