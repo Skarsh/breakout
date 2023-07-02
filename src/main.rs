@@ -135,6 +135,24 @@ fn process_events(
             glfw::WindowEvent::Key(Key::D, _, Action::Release, _) => {
                 game.keys[glfw::Key::D as usize] = false;
             }
+            glfw::WindowEvent::Key(Key::W, _, Action::Press, _) => {
+                game.keys[glfw::Key::W as usize] = true;
+            }
+            glfw::WindowEvent::Key(Key::W, _, Action::Release, _) => {
+                game.keys[glfw::Key::W as usize] = false;
+            }
+            glfw::WindowEvent::Key(Key::S, _, Action::Press, _) => {
+                game.keys[glfw::Key::S as usize] = true;
+            }
+            glfw::WindowEvent::Key(Key::S, _, Action::Release, _) => {
+                game.keys[glfw::Key::S as usize] = false;
+            }
+            glfw::WindowEvent::Key(Key::Enter, _, Action::Press, _) => {
+                game.keys[glfw::Key::Enter as usize] = true;
+            }
+            glfw::WindowEvent::Key(Key::Enter, _, Action::Release, _) => {
+                game.keys[glfw::Key::Enter as usize] = false;
+            }
             glfw::WindowEvent::Key(Key::Space, _, Action::Press, _) => {
                 game.keys[glfw::Key::Space as usize] = true;
             }
