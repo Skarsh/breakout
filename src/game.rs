@@ -36,6 +36,7 @@ const NUM_LIVES: u32 = 3;
 pub struct Game {
     state: GameState,
     pub keys: [bool; 1024],
+    pub keys_processed: [bool; 1024],
     pub graphics: Graphics,
     levels: Vec<GameLevel>,
     level: u32,
@@ -108,6 +109,7 @@ impl Game {
         Self {
             state: GameState::Active,
             keys: [false; 1024],
+            keys_processed: [false; 1024],
             graphics,
             levels,
             level: 0,
@@ -167,8 +169,33 @@ impl Game {
 
     pub fn process_input(&mut self, dt: f64) {
         match self.state {
-            GameState::Menu => {}
-            GameState::Win => {}
+            GameState::Menu => {
+                if self.keys[glfw::Key::Enter as usize]
+                    && !self.keys_processed[glfw::Key::Enter as usize]
+                {
+                    self.state = GameState::Active;
+                    self.keys_processed[glfw::Key::Enter as usize] = true;
+                }
+                if self.keys[glfw::Key::W as usize] && !self.keys_processed[glfw::Key::W as usize] {
+                    self.level = (self.level + 1) % 4;
+                    self.keys_processed[glfw::Key::W as usize] = true;
+                }
+                if self.keys[glfw::Key::S as usize] && !self.keys_processed[glfw::Key::S as usize] {
+                    if self.level > 0 {
+                        self.level -= 1;
+                    } else {
+                        self.level = 3;
+                        self.keys_processed[glfw::Key::S as usize] = true;
+                    }
+                }
+            }
+            GameState::Win => {
+                if self.keys[glfw::Key::Enter as usize] {
+                    self.keys_processed[glfw::Key::Enter as usize] = true;
+                    self.effects.chaos = false;
+                    self.state = GameState::Menu;
+                }
+            }
             GameState::Active => {
                 let velocity = PLAYER_VELOCITY * dt as f32;
 
