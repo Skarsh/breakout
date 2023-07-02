@@ -22,7 +22,7 @@ use crate::{
     powerup::{PowerUp, PowerUpType},
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 enum GameState {
     Active,
     Menu,
@@ -31,6 +31,7 @@ enum GameState {
 
 pub const PLAYER_SIZE: glm::Vec2 = glm::Vec2::new(100.0, 20.0);
 pub const PLAYER_VELOCITY: f32 = 500.0;
+const NUM_LIVES: u32 = 3;
 
 pub struct Game {
     state: GameState,
@@ -46,6 +47,7 @@ pub struct Game {
     powerups: Vec<PowerUp>,
     audio_manager: AudioManager,
     text_renderer: TextRenderer,
+    lives: u32,
 }
 
 impl Game {
@@ -118,6 +120,7 @@ impl Game {
             audio_manager: AudioManager::<DefaultBackend>::new(AudioManagerSettings::default())
                 .unwrap(),
             text_renderer,
+            lives: NUM_LIVES,
         }
     }
 
@@ -203,16 +206,33 @@ impl Game {
             glm::vec2(self.ball.radius / 2.0, self.ball.radius / 2.0),
         );
         self.update_powerups(dt as f32);
-        if self.ball.position().y >= self.graphics.height as f32 {
-            self.reset_level();
-            self.reset_player();
-        }
 
+        // reduce shake time
         if self.shake_time > 0.0 {
             self.shake_time -= dt as f32;
             if self.shake_time <= 0.0 {
                 self.effects.shake = false;
             }
+        }
+
+        // check loss condition
+        if self.ball.position().y >= self.graphics.height as f32 {
+            self.lives -= 1;
+            if self.lives == 0 {
+                self.reset_level();
+                self.state = GameState::Menu;
+            }
+            self.reset_player();
+        }
+
+        // check win condition
+        if self.state == GameState::Active
+            && self.levels.get(self.level as usize).unwrap().is_completed()
+        {
+            self.reset_level();
+            self.reset_player();
+            self.effects.chaos = true;
+            self.state = GameState::Win;
         }
     }
 
@@ -289,6 +309,7 @@ impl Game {
             ),
             _ => eprintln!("Illegal level!"),
         }
+        self.lives = NUM_LIVES;
     }
 
     fn reset_player(&mut self) {
