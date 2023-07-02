@@ -128,8 +128,7 @@ impl TextRenderer {
                 let ch = &self.characters.get(c).unwrap();
                 let x_pos = x + ch.bearing.x as f32 * scale;
                 let y_pos = y
-                    + (self.characters.get(&('H' as u8)).unwrap().bearing.y - ch.bearing.y) as f32
-                        * scale;
+                    + (self.characters.get(&b'H').unwrap().bearing.y - ch.bearing.y) as f32 * scale;
 
                 let w = ch.size.x as f32 * scale;
                 let h = ch.size.y as f32 * scale;
