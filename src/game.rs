@@ -159,9 +159,8 @@ impl Game {
             .set_mat4("projection\0", &projection);
 
         let sound_data = StaticSoundData::from_file(
-            "resources/audio/lady_of_the_80s.mp3",
-            //StaticSoundSettings::new().loop_region(..),
-            StaticSoundSettings::new().volume(0.1),
+            "resources/audio/breakout.mp3",
+            StaticSoundSettings::new().loop_region(..),
         )
         .unwrap();
         self.audio_manager.play(sound_data).unwrap();
