@@ -104,7 +104,7 @@ impl Game {
             graphics.height,
             graphics.shader_manager.get_shader("text").clone(),
         );
-        text_renderer.load("resources/fonts/ocraext.TTF".to_string(), 24);
+        text_renderer.load("resources/fonts/OCRAEXT.TTF".to_string(), 24);
 
         Self {
             state: GameState::Menu,
@@ -160,7 +160,7 @@ impl Game {
 
         let sound_data = StaticSoundData::from_file(
             "resources/audio/breakout.mp3",
-            StaticSoundSettings::new().loop_region(..),
+            StaticSoundSettings::new().loop_region(..).volume(0.5),
         )
         .unwrap();
         self.audio_manager.play(sound_data).unwrap();
@@ -555,7 +555,7 @@ impl Game {
                             .play(
                                 StaticSoundData::from_file(
                                     "resources/audio/bleep.mp3",
-                                    StaticSoundSettings::default(),
+                                    StaticSoundSettings::new().volume(0.5),
                                 )
                                 .unwrap(),
                             )
@@ -568,7 +568,7 @@ impl Game {
                             .play(
                                 StaticSoundData::from_file(
                                     "resources/audio/solid.wav",
-                                    StaticSoundSettings::default(),
+                                    StaticSoundSettings::new().volume(0.5),
                                 )
                                 .unwrap(),
                             )
@@ -637,7 +637,7 @@ impl Game {
                         .play(
                             StaticSoundData::from_file(
                                 "resources/audio/powerup.wav",
-                                StaticSoundSettings::default(),
+                                StaticSoundSettings::new().volume(0.5),
                             )
                             .unwrap(),
                         )
